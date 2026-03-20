@@ -183,9 +183,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// CSS custom properties carry gap, columns, aspect-ratio, and border values
 	// so layout CSS never needs to repeat them as inline styles.
 
+	$gap_raw = $attributes['style']['spacing']['blockGap'] ?? null;
+	$gap     = is_string( $gap_raw ) && $gap_raw !== '' ? $gap_raw : '16px';
+
+	// WordPress stores spacing presets as "var:preset|spacing|80".
+	// Convert to a valid CSS value: "var(--wp--preset--spacing--80)".
+	if ( str_starts_with( $gap, 'var:' ) ) {
+		$gap = 'var(--wp--' . str_replace( '|', '--', substr( $gap, 4 ) ) . ')';
+	}
+
 	$css_vars = array(
 		"--ph-gallery-columns:{$columns}",
 		"--ph-gallery-row-height:{$row_height}px",
+		"--ph-gallery-gap:{$gap}",
 	);
 
 	if ( $aspect_ratio ) {

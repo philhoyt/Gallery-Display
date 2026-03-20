@@ -6,7 +6,7 @@
 .wp-block-ph-gallery-display.is-layout-grid {
 	display: grid;
 	grid-template-columns: repeat(var(--ph-gallery-columns), 1fr);
-	gap: var(--wp--style--block-gap, 16px);
+	gap: var(--ph-gallery-gap, 16px);
 }
 
 .is-layout-grid .ph-gallery-item {

@@ -8,14 +8,14 @@
  */
 
 function getGapPx( el ) {
-	const raw = getComputedStyle( el ).getPropertyValue( '--wp--style--block-gap' ).trim();
+	const raw = getComputedStyle( el ).getPropertyValue( '--ph-gallery-gap' ).trim();
 	if ( ! raw ) {
 		return 16;
 	}
 	const tmp = document.createElement( 'div' );
 	tmp.style.cssText = 'position:absolute;visibility:hidden;width:' + raw;
 	document.documentElement.appendChild( tmp );
-	const px = tmp.offsetWidth || 16;
+	const px = tmp.offsetWidth;
 	document.documentElement.removeChild( tmp );
 	return px;
 }

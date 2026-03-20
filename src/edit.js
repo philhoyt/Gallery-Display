@@ -32,6 +32,35 @@ function esc( val ) {
  * @param {string} pluginUrl  Absolute URL to the plugin root (trailing slash).
  * @return {string} Full HTML document.
  */
+/**
+ * Resolve a blockGap attribute value to a concrete CSS length string.
+ *
+ * WordPress stores spacing presets as "var:preset|spacing|80". We convert
+ * that to "var(--wp--preset--spacing--80)" and then measure it in the
+ * editor's document (where WP defines the preset vars) so the srcdoc iframe
+ * gets a plain pixel value that works without WordPress's CSS being loaded.
+ *
+ * @param {string|undefined} raw The raw blockGap attribute value.
+ * @return {string} A CSS length string, e.g. "24px".
+ */
+function resolveGapValue( raw ) {
+	if ( ! raw ) {
+		return '16px';
+	}
+	// "var:preset|spacing|80" → "var(--wp--preset--spacing--80)"
+	let cssValue = raw;
+	if ( raw.startsWith( 'var:' ) ) {
+		cssValue = 'var(--wp--' + raw.slice( 4 ).replace( /\|/g, '--' ) + ')';
+	}
+	// Resolve in the editor document where WP preset vars are defined.
+	const tmp = document.createElement( 'div' );
+	tmp.style.cssText = 'position:absolute;visibility:hidden;width:' + cssValue;
+	document.documentElement.appendChild( tmp );
+	const px = tmp.offsetWidth;
+	document.documentElement.removeChild( tmp );
+	return Number.isFinite( px ) ? px + 'px' : cssValue;
+}
+
 function buildPreviewDoc( attributes, pluginUrl ) {
 	const {
 		images,
@@ -42,12 +71,16 @@ function buildPreviewDoc( attributes, pluginUrl ) {
 		rowHeight,
 		showCaption,
 		captionPosition,
+		style: blockStyle,
 	} = attributes;
+
+	const gap = resolveGapValue( blockStyle?.spacing?.blockGap );
 
 	const cssVars = [
 		`--ph-gallery-columns:${ columns }`,
 		`--ph-gallery-row-height:${ rowHeight }px`,
 		`--ph-gallery-ratio:${ aspectRatio }`,
+		`--ph-gallery-gap:${ gap }`,
 	].join( ';' );
 
 	const wrapperClass = [

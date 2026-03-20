@@ -6,7 +6,7 @@
 .wp-block-ph-gallery-display.is-layout-list {
 	display: flex;
 	flex-direction: column;
-	gap: var(--wp--style--block-gap, 16px);
+	gap: var(--ph-gallery-gap, 16px);
 }
 
 .is-layout-list .ph-gallery-item {
