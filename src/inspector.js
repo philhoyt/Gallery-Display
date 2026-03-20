@@ -8,10 +8,11 @@ import {
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { applyFilters } from '@wordpress/hooks';
 
 import MediaSelector from './MediaSelector';
 
-const LAYOUTS = [
+const DEFAULT_LAYOUTS = [
 	{ value: 'grid',      label: __( 'Grid', 'gallery-display' ) },
 	{ value: 'masonry',   label: __( 'Masonry', 'gallery-display' ) },
 	{ value: 'mosaic',    label: __( 'Mosaic', 'gallery-display' ) },
@@ -98,7 +99,7 @@ export default function Inspector( { attributes, setAttributes } ) {
 					__nextHasNoMarginBottom
 					label={ __( 'Layout', 'gallery-display' ) }
 					value={ layout }
-					options={ LAYOUTS }
+					options={ applyFilters( 'galleryDisplay.layouts', DEFAULT_LAYOUTS ) }
 					onChange={ ( v ) => setAttributes( { layout: v } ) }
 				/>
 

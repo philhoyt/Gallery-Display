@@ -38,7 +38,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		return;
 	}
 
-	$valid_layouts  = array( 'grid', 'masonry', 'mosaic', 'justified', 'list' );
+	$valid_layouts  = apply_filters( 'gallery_display_valid_layouts', array( 'grid', 'masonry', 'mosaic', 'justified', 'list' ) );
 	$valid_link_tos = array( 'lightbox', 'attachment', 'media', 'none' );
 	$layout         = in_array( $layout, $valid_layouts, true ) ? $layout : 'grid';
 	$link_to        = in_array( $link_to, $valid_link_tos, true ) ? $link_to : 'lightbox';
