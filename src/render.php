@@ -40,8 +40,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	$valid_layouts  = array( 'grid', 'masonry', 'mosaic', 'justified', 'list' );
 	$valid_link_tos = array( 'lightbox', 'attachment', 'media', 'none' );
-	$layout  = in_array( $layout, $valid_layouts, true ) ? $layout : 'grid';
-	$link_to = in_array( $link_to, $valid_link_tos, true ) ? $link_to : 'lightbox';
+	$layout         = in_array( $layout, $valid_layouts, true ) ? $layout : 'grid';
+	$link_to        = in_array( $link_to, $valid_link_tos, true ) ? $link_to : 'lightbox';
 
 	// 2. Enqueue layout-specific JS (frontend only).
 	// Layout CSS is registered via wp_enqueue_block_style() in the main plugin
@@ -56,7 +56,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// in build/ at runtime.
 	$plugin_url = defined( 'GALLERY_DISPLAY_URL' )
 		? GALLERY_DISPLAY_URL
-		: plugin_dir_url( dirname( __FILE__ ) );
+		: plugin_dir_url( __DIR__ );
 	$version    = defined( 'GALLERY_DISPLAY_VERSION' ) ? GALLERY_DISPLAY_VERSION : '1.0.0';
 
 	if ( 'masonry' === $layout || 'mosaic' === $layout ) {
@@ -184,7 +184,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// so layout CSS never needs to repeat them as inline styles.
 
 	$gap_raw = $attributes['style']['spacing']['blockGap'] ?? null;
-	$gap     = is_string( $gap_raw ) && $gap_raw !== '' ? $gap_raw : '16px';
+	$gap     = is_string( $gap_raw ) && '' !== $gap_raw ? $gap_raw : '16px';
 
 	// WordPress stores spacing presets as "var:preset|spacing|80".
 	// Convert to a valid CSS value: "var(--wp--preset--spacing--80)".
