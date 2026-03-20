@@ -1,0 +1,25 @@
+/*
+ * Justified layout — rows of images at a uniform row height with widths
+ * adjusted to fill edge-to-edge. No cropping.
+ *
+ * init-justified.js reads data-width / data-height from each <img>,
+ * calls justifiedLayout() for box geometry, and applies absolute positioning.
+ * Container height is also set by JS after calculation.
+ */
+
+.wp-block-ph-gallery-display.is-layout-justified {
+	display: block;
+	position: relative;
+	/* height set by init-justified.js */
+}
+
+.is-layout-justified .ph-gallery-item {
+	/* position, top, left, width, height — all set by init-justified.js */
+	box-sizing: border-box;
+	overflow: hidden;
+}
+
+.is-layout-justified .ph-gallery-item img {
+	/* width / height / object-fit applied by JS after layout calculation */
+	display: block;
+}

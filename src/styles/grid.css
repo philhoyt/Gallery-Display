@@ -1,0 +1,24 @@
+/*
+ * Grid layout — CSS only, no JavaScript required.
+ * Fixed columns, uniform aspect ratio, images crop via object-fit: cover.
+ */
+
+.wp-block-ph-gallery-display.is-layout-grid {
+	display: grid;
+	grid-template-columns: repeat(var(--ph-gallery-columns), 1fr);
+	gap: var(--wp--style--block-gap, 16px);
+}
+
+.is-layout-grid .ph-gallery-item {
+	aspect-ratio: var(--ph-gallery-ratio);
+}
+
+.is-layout-grid .ph-gallery-item img,
+.is-layout-grid .ph-gallery-item .ph-gallery-item__link {
+	width: 100%;
+	height: 100%;
+}
+
+.is-layout-grid .ph-gallery-item img {
+	object-fit: cover;
+}

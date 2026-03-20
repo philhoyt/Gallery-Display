@@ -1,0 +1,15 @@
+/*
+ * Masonry layout — Isotope masonry mode.
+ * init-masonry.js sets explicit pixel widths on items and initialises Isotope.
+ * Items have auto height so tall images display at full height without cropping.
+ */
+
+.wp-block-ph-gallery-display.is-layout-masonry {
+	display: block; /* Isotope uses absolute positioning internally */
+	position: relative;
+}
+
+.is-layout-masonry .ph-gallery-item img {
+	width: 100%;
+	height: auto;
+}

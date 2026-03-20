@@ -1,0 +1,32 @@
+/*
+ * Mosaic layout — Isotope packery mode.
+ *
+ * Repeating 5-image pattern: positions 0 and 3 per group of 5 get the
+ * --large modifier (2/3 container width); the remaining three fill 1/3.
+ * init-mosaic.js computes pixel widths from data attributes then calls Isotope.
+ */
+
+.wp-block-ph-gallery-display.is-layout-mosaic {
+	display: block;
+	position: relative;
+}
+
+.is-layout-mosaic .ph-gallery-item {
+	/* Pixel width set by init-mosaic.js */
+	aspect-ratio: 1/1;
+	overflow: hidden;
+}
+
+.is-layout-mosaic .ph-gallery-item--large {
+	aspect-ratio: 4/3;
+}
+
+.is-layout-mosaic .ph-gallery-item img,
+.is-layout-mosaic .ph-gallery-item .ph-gallery-item__link {
+	width: 100%;
+	height: 100%;
+}
+
+.is-layout-mosaic .ph-gallery-item img {
+	object-fit: cover;
+}
