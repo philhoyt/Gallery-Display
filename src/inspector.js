@@ -28,6 +28,20 @@ const ASPECT_RATIOS = [
 	{ value: '9/16', label: __( '9:16 — Tall Portrait', 'gallery-display' ) },
 ];
 
+const ORDER_OPTIONS = [
+	{ value: 'default',    label: __( 'Default (manual)', 'gallery-display' ) },
+	{ value: 'date-asc',   label: __( 'Date (oldest first)', 'gallery-display' ) },
+	{ value: 'date-desc',  label: __( 'Date (newest first)', 'gallery-display' ) },
+	{ value: 'title-asc',  label: __( 'Title (A–Z)', 'gallery-display' ) },
+	{ value: 'title-desc', label: __( 'Title (Z–A)', 'gallery-display' ) },
+	{ value: 'rand',       label: __( 'Random', 'gallery-display' ) },
+];
+
+const ORDER_OPTIONS_MOSAIC = [
+	...ORDER_OPTIONS,
+	{ value: 'auto', label: __( 'Auto (best fit)', 'gallery-display' ) },
+];
+
 const FALLBACK_SIZES = [
 	{ value: 'thumbnail', label: 'Thumbnail' },
 	{ value: 'medium',    label: 'Medium' },
@@ -47,6 +61,7 @@ export default function Inspector( { attributes, setAttributes } ) {
 		columns,
 		aspectRatio,
 		rowHeight,
+		orderBy,
 	} = attributes;
 
 	const [ imageSizes, setImageSizes ] = useState( FALLBACK_SIZES );
@@ -118,6 +133,14 @@ export default function Inspector( { attributes, setAttributes } ) {
 						max={ 500 }
 					/>
 				) }
+
+				<SelectControl
+					__nextHasNoMarginBottom
+					label={ __( 'Order', 'gallery-display' ) }
+					value={ orderBy }
+					options={ layout === 'mosaic' ? ORDER_OPTIONS_MOSAIC : ORDER_OPTIONS }
+					onChange={ ( v ) => setAttributes( { orderBy: v } ) }
+				/>
 			</PanelBody>
 
 			{ /* ----------------------------------------------------------------

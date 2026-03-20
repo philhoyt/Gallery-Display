@@ -172,11 +172,81 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'title'          => $post->post_title,
 			'desc'           => $post->post_content,
 			'attachment_url' => get_permalink( $id ),
+			'post_date'      => $post->post_date,
 		);
 	}
 
 	if ( empty( $resolved ) ) {
 		return;
+	}
+
+	// 3b. Apply ordering.
+	$order_by     = $attributes['orderBy'] ?? 'default';
+	$valid_orders = array( 'default', 'date-asc', 'date-desc', 'title-asc', 'title-desc', 'rand', 'auto' );
+	$order_by     = in_array( $order_by, $valid_orders, true ) ? $order_by : 'default';
+
+	switch ( $order_by ) {
+		case 'date-asc':
+			usort( $resolved, static fn( $a, $b ) => $a['post_date'] <=> $b['post_date'] );
+			break;
+
+		case 'date-desc':
+			usort( $resolved, static fn( $a, $b ) => $b['post_date'] <=> $a['post_date'] );
+			break;
+
+		case 'title-asc':
+			usort( $resolved, static fn( $a, $b ) => strcmp( $a['title'], $b['title'] ) );
+			break;
+
+		case 'title-desc':
+			usort( $resolved, static fn( $a, $b ) => strcmp( $b['title'], $a['title'] ) );
+			break;
+
+		case 'rand':
+			shuffle( $resolved );
+			break;
+
+		case 'auto':
+			// Mosaic best-fit: wide images (landscape) go into the large 4:3
+			// slots (positions 0 and 3 of every 5); portrait/square images fill
+			// the remaining 1:1 slots.
+			if ( 'mosaic' === $layout ) {
+				$wide   = array();
+				$narrow = array();
+
+				foreach ( $resolved as $img ) {
+					$ratio = ( $img['full_w'] > 0 && $img['full_h'] > 0 )
+						? $img['full_w'] / $img['full_h']
+						: 1.0;
+					if ( $ratio > 1.0 ) {
+						$wide[] = $img;
+					} else {
+						$narrow[] = $img;
+					}
+				}
+
+				$sorted     = array();
+				$wide_idx   = 0;
+				$narrow_idx = 0;
+				$total      = count( $resolved );
+
+				for ( $i = 0; $i < $total; $i++ ) {
+					$is_large = in_array( $i % 5, array( 0, 3 ), true );
+
+					if ( $is_large && $wide_idx < count( $wide ) ) {
+						$sorted[] = $wide[ $wide_idx++ ];
+					} elseif ( ! $is_large && $narrow_idx < count( $narrow ) ) {
+						$sorted[] = $narrow[ $narrow_idx++ ];
+					} elseif ( $wide_idx < count( $wide ) ) {
+						$sorted[] = $wide[ $wide_idx++ ];
+					} else {
+						$sorted[] = $narrow[ $narrow_idx++ ];
+					}
+				}
+
+				$resolved = $sorted;
+			}
+			break;
 	}
 
 	// 4. Build wrapper attributes.
