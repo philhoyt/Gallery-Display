@@ -22,3 +22,18 @@
 .is-layout-grid .ph-gallery-item img {
 	object-fit: cover;
 }
+
+/* Below caption: move aspect-ratio from the figure to the image area
+   so the caption can flow naturally underneath. */
+.has-caption.caption-below .is-layout-grid .ph-gallery-item {
+	aspect-ratio: unset;
+}
+
+.has-caption.caption-below .is-layout-grid .ph-gallery-item .ph-gallery-item__link,
+.has-caption.caption-below .is-layout-grid .ph-gallery-item > img {
+	aspect-ratio: var(--ph-gallery-ratio);
+	width: 100%;
+	height: auto;
+	overflow: hidden;
+	display: block;
+}

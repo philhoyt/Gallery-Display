@@ -39,6 +39,11 @@
 	margin: 0;
 }
 
+/* Caption — below: let the figure grow to include the caption */
+.has-caption.caption-below .ph-gallery-item {
+	overflow: visible;
+}
+
 /* Caption — overlay */
 .has-caption.caption-overlay .ph-gallery-item {
 	position: relative;

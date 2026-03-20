@@ -228,13 +228,22 @@ export default function Edit( { attributes, setAttributes } ) {
 						{ ' · ' }
 						{ layout }
 					</span>
-					<Button
-						variant="secondary"
-						size="compact"
-						onClick={ () => setIsPreviewOpen( true ) }
-					>
-						{ __( 'Preview', 'gallery-display' ) }
-					</Button>
+					<div className="ph-gallery-display-editor__actions">
+						<MediaSelector
+							images={ images }
+							onSelect={ ( selected ) =>
+								setAttributes( { images: selected } )
+							}
+							buttonLabel={ __( 'Edit Gallery', 'gallery-display' ) }
+						/>
+						<Button
+							variant="secondary"
+							size="compact"
+							onClick={ () => setIsPreviewOpen( true ) }
+						>
+							{ __( 'Preview', 'gallery-display' ) }
+						</Button>
+					</div>
 				</div>
 			</div>
 
@@ -249,6 +258,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						srcDoc={ previewDoc }
 						title={ __( 'Gallery Preview', 'gallery-display' ) }
 						className="ph-gallery-display-preview-modal__iframe"
+						style={ { pointerEvents: 'none' } }
 					/>
 				</Modal>
 			) }

@@ -30,3 +30,22 @@
 .is-layout-mosaic .ph-gallery-item img {
 	object-fit: cover;
 }
+
+/* Below caption: move aspect-ratio from the figure to the image area. */
+.has-caption.caption-below .is-layout-mosaic .ph-gallery-item {
+	aspect-ratio: unset;
+}
+
+.has-caption.caption-below .is-layout-mosaic .ph-gallery-item .ph-gallery-item__link,
+.has-caption.caption-below .is-layout-mosaic .ph-gallery-item > img {
+	aspect-ratio: 1/1;
+	width: 100%;
+	height: auto;
+	overflow: hidden;
+	display: block;
+}
+
+.has-caption.caption-below .is-layout-mosaic .ph-gallery-item--large .ph-gallery-item__link,
+.has-caption.caption-below .is-layout-mosaic .ph-gallery-item--large > img {
+	aspect-ratio: 4/3;
+}

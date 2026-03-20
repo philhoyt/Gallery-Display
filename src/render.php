@@ -291,9 +291,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		if ( 'list' === $layout ) {
-			if ( $img['title'] ) {
-				printf( '<p class="ph-gallery-item__title">%s</p>', esc_html( $img['title'] ) );
-			}
 			if ( $img['caption'] ) {
 				printf( '<p class="ph-gallery-item__caption">%s</p>', wp_kses_post( $img['caption'] ) );
 			}

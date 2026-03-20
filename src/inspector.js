@@ -135,6 +135,34 @@ export default function Inspector( { attributes, setAttributes } ) {
 					onChange={ ( v ) => setAttributes( { thumbnailSize: v } ) }
 				/>
 
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Show Caption', 'gallery-display' ) }
+					checked={ showCaption }
+					onChange={ ( v ) => setAttributes( { showCaption: v } ) }
+				/>
+
+				{ showCaption && (
+					<SelectControl
+						__nextHasNoMarginBottom
+						label={ __( 'Caption Position', 'gallery-display' ) }
+						value={ captionPosition }
+						options={ [
+							{
+								value: 'below',
+								label: __( 'Below Image', 'gallery-display' ),
+							},
+							{
+								value: 'overlay',
+								label: __( 'Overlay', 'gallery-display' ),
+							},
+						] }
+						onChange={ ( v ) =>
+							setAttributes( { captionPosition: v } )
+						}
+					/>
+				) }
+
 				<MediaSelector
 					images={ images }
 					onSelect={ ( selected ) =>
@@ -187,44 +215,6 @@ export default function Inspector( { attributes, setAttributes } ) {
 						value={ fullSize }
 						options={ imageSizes }
 						onChange={ ( v ) => setAttributes( { fullSize: v } ) }
-					/>
-				) }
-			</PanelBody>
-
-			{ /* ----------------------------------------------------------------
-			     Style Panel — caption controls only.
-			     Gap, background, and border are handled by core block supports
-			     in the editor's Spacing, Color, and Border panels.
-			     ---------------------------------------------------------------- */ }
-			<PanelBody
-				title={ __( 'Style', 'gallery-display' ) }
-				initialOpen={ false }
-			>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					label={ __( 'Show Caption', 'gallery-display' ) }
-					checked={ showCaption }
-					onChange={ ( v ) => setAttributes( { showCaption: v } ) }
-				/>
-
-				{ showCaption && (
-					<SelectControl
-						__nextHasNoMarginBottom
-						label={ __( 'Caption Position', 'gallery-display' ) }
-						value={ captionPosition }
-						options={ [
-							{
-								value: 'below',
-								label: __( 'Below Image', 'gallery-display' ),
-							},
-							{
-								value: 'overlay',
-								label: __( 'Overlay', 'gallery-display' ),
-							},
-						] }
-						onChange={ ( v ) =>
-							setAttributes( { captionPosition: v } )
-						}
 					/>
 				) }
 			</PanelBody>
