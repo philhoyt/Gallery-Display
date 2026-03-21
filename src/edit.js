@@ -258,7 +258,6 @@ export default function Edit( { attributes, setAttributes } ) {
 						srcDoc={ previewDoc }
 						title={ __( 'Gallery Preview', 'gallery-display' ) }
 						className="ph-gallery-display-preview-modal__iframe"
-						style={ { pointerEvents: 'none' } }
 					/>
 				</Modal>
 			) }
