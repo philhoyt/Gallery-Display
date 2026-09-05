@@ -57,7 +57,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	$plugin_url = defined( 'GALLERY_DISPLAY_URL' )
 		? GALLERY_DISPLAY_URL
 		: plugin_dir_url( __DIR__ );
-	$version    = defined( 'GALLERY_DISPLAY_VERSION' ) ? GALLERY_DISPLAY_VERSION : '1.0.0';
+	// null rather than a literal: a second copy of the version here would drift
+	// out of sync the way the constant itself did. The constant is defined
+	// before any block renders, so the fallback is only a guard.
+	$version = defined( 'GALLERY_DISPLAY_VERSION' ) ? GALLERY_DISPLAY_VERSION : null;
 
 	if ( 'masonry' === $layout || 'mosaic' === $layout ) {
 		wp_enqueue_script(

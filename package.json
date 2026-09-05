@@ -19,7 +19,8 @@
 	},
 	"devDependencies": {
 		"@wordpress/hooks": "^4.54.0",
-		"@wordpress/scripts": "^30.0.0"
+		"@wordpress/scripts": "^34.2.0",
+		"globals": "^17.12.0"
 	},
 	"dependencies": {
 		"isotope-layout": "^3.0.6",
