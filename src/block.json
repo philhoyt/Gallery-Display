@@ -2,12 +2,19 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "ph/gallery-display",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"title": "Gallery Display",
 	"category": "media",
 	"icon": "format-gallery",
 	"description": "A flexible image gallery with grid, masonry, mosaic, justified, and list layouts.",
-	"keywords": [ "gallery", "images", "photos", "masonry", "mosaic", "justified" ],
+	"keywords": [
+		"gallery",
+		"images",
+		"photos",
+		"masonry",
+		"mosaic",
+		"justified"
+	],
 	"textdomain": "gallery-display",
 	"attributes": {
 		"images": {

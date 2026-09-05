@@ -10,16 +10,19 @@
 .wp-block-ph-gallery-display.is-layout-justified {
 	display: block;
 	position: relative;
+
 	/* height set by init-justified.js */
 }
 
 .is-layout-justified .ph-gallery-item {
+
 	/* position, top, left, width, height — all set by init-justified.js */
 	box-sizing: border-box;
 	overflow: hidden;
 }
 
 .is-layout-justified .ph-gallery-item img {
+
 	/* width / height / object-fit applied by JS after layout calculation */
 	display: block;
 }

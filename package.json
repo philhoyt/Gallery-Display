@@ -1,6 +1,6 @@
 {
 	"name": "gallery-display",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A flexible image gallery block for WordPress.",
 	"author": "Phil Hoyt",
 	"license": "GPL-2.0-or-later",
@@ -13,10 +13,14 @@
 		"lint": "npm run lint:js && npm run lint:css && npm run lint:php",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "WP_COPY_PHP_FILES_TO_DIST=true wp-scripts plugin-zip",
-		"start": "WP_COPY_PHP_FILES_TO_DIST=true wp-scripts start"
+		"start": "WP_COPY_PHP_FILES_TO_DIST=true wp-scripts start",
+		"test:unit": "wp-scripts test-unit-js",
+		"test": "npm run test:unit"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "^30.0.0"
+		"@wordpress/hooks": "^4.54.0",
+		"@wordpress/scripts": "^34.2.0",
+		"globals": "^17.12.0"
 	},
 	"dependencies": {
 		"isotope-layout": "^3.0.6",

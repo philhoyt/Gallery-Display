@@ -4,8 +4,9 @@
  * Plugin URI:        https://github.com/philhoyt/gallery-display
  * Description:       A flexible image gallery block with grid, masonry, mosaic, justified, and list layouts.
  * Requires at least: 6.6
+ * Tested up to:      7.1
  * Requires PHP:      7.4
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Phil Hoyt
  * Author URI:        https://philhoyt.com
  * License:           GPL-2.0-or-later
@@ -21,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GALLERY_DISPLAY_VERSION', '1.0.0' );
+define( 'GALLERY_DISPLAY_VERSION', '1.0.1' );
 define( 'GALLERY_DISPLAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GALLERY_DISPLAY_URL', plugin_dir_url( __FILE__ ) );
 
@@ -36,6 +37,15 @@ define( 'GALLERY_DISPLAY_URL', plugin_dir_url( __FILE__ ) );
  *
  * The shared style-index.css is handled automatically by WordPress via the
  * "style" field in block.json and is not registered here.
+ *
+ * The PhotoSwipe stylesheet goes through the same path. It is only needed when
+ * a gallery uses the lightbox, but enqueueing it from render.php meant it was
+ * requested after wp_head had already printed the style queue, so the lightbox
+ * links rendered unstyled until it arrived. wp_enqueue_block_style() places it
+ * in the head and covers every context the block can render in — post content,
+ * FSE templates, patterns, synced blocks — which a has_block() check on
+ * wp_enqueue_scripts would not. The cost is one small stylesheet on gallery
+ * pages that do not use the lightbox.
  */
 function register_block(): void {
 	register_block_type( __DIR__ . '/build' );
@@ -52,6 +62,15 @@ function register_block(): void {
 			)
 		);
 	}
+
+	wp_enqueue_block_style(
+		'ph/gallery-display',
+		array(
+			'handle' => 'ph-gallery-display-photoswipe',
+			'src'    => GALLERY_DISPLAY_URL . 'build/frontend/init-lightbox.css',
+			'ver'    => GALLERY_DISPLAY_VERSION,
+		)
+	);
 }
 add_action( 'init', __NAMESPACE__ . '\\register_block' );
 
@@ -94,11 +113,11 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\\register_rest_routes' );
  * @return array<int, array{slug: string, label: string}>
  */
 function rest_get_image_sizes(): array {
-	$sizes  = get_intermediate_image_sizes();
-	$result = array();
+	$sizes      = get_intermediate_image_sizes();
+	$additional = wp_get_additional_image_sizes();
+	$result     = array();
 
 	foreach ( $sizes as $slug ) {
-		$additional = wp_get_additional_image_sizes();
 		if ( isset( $additional[ $slug ] ) ) {
 			$w = (int) $additional[ $slug ]['width'];
 			$h = (int) $additional[ $slug ]['height'];

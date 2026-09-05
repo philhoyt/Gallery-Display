@@ -11,4 +11,4 @@
 import Isotope from 'isotope-layout';
 import 'isotope-packery'; // registers the packery layout mode with Isotope's mode registry
 
-window.IsotopeLib = Isotope; // eslint-disable-line no-undef
+window.IsotopeLib = Isotope;
