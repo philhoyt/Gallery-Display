@@ -7,8 +7,16 @@
  */
 
 import { applyFilters } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
 
-import { esc, cssIdent, cssRatio, cssLength, intInRange } from './sanitize';
+import {
+	esc,
+	cssIdent,
+	cssRatio,
+	cssLength,
+	intInRange,
+	sanitizeCaption,
+} from './sanitize';
 
 const MOSAIC_LARGE = new Set( [ 0, 3 ] );
 
@@ -54,9 +62,13 @@ function resolveGapValue( raw ) {
  *
  * @param {Object} attributes Block attributes.
  * @param {string} pluginUrl  Absolute URL to the plugin root (trailing slash).
+ * @param {Object} dimensions Map of attachment id to { width, height }, used
+ *                            when an image carries no stored dimensions — as
+ *                            happens after a transform from core/gallery.
+ *                            Resolved read-only by the editor; never stored.
  * @return {string} Full HTML document.
  */
-export function buildPreviewDoc( attributes, pluginUrl ) {
+export function buildPreviewDoc( attributes, pluginUrl, dimensions = {} ) {
 	const {
 		images,
 		layout,
@@ -66,6 +78,7 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 		rowHeight,
 		showCaption,
 		captionPosition,
+		caption,
 		style: blockStyle,
 	} = attributes;
 
@@ -95,6 +108,12 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 	// Build figure items.
 	const itemsHtml = images
 		.map( ( img, i ) => {
+			// A transformed gallery has no stored dimensions — core/image does
+			// not carry them. The editor resolves them read-only and passes
+			// them in here; they are never written back to attributes.
+			const resolved = dimensions[ img.id ] ?? {};
+			const imgWidth = img.width || resolved.width || '';
+			const imgHeight = img.height || resolved.height || '';
 			const isLarge =
 				safeLayout === 'mosaic' && MOSAIC_LARGE.has( i % 5 );
 			const itemClass = isLarge
@@ -106,7 +125,9 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 			const linkLabel = img.alt || img.caption || img.title || '';
 			const labelAttr = linkLabel
 				? ''
-				: ` aria-label="${ esc( img.filename || 'Image' ) }"`;
+				: ` aria-label="${ esc(
+						img.filename || __( 'Image', 'gallery-display' )
+				  ) }"`;
 
 			let linkOpen = '';
 			let linkClose = '';
@@ -114,8 +135,8 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 				linkOpen = `<a href="${ esc(
 					img.url
 				) }" class="ph-gallery-item__link"${ labelAttr } data-pswp-width="${ esc(
-					img.width
-				) }" data-pswp-height="${ esc( img.height ) }">`;
+					imgWidth
+				) }" data-pswp-height="${ esc( imgHeight ) }">`;
 				linkClose = '</a>';
 			} else if ( linkTo === 'media' ) {
 				linkOpen = `<a href="${ esc(
@@ -142,11 +163,11 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 			return `<figure class="${ itemClass }">${ linkOpen }<img src="${ esc(
 				img.url
 			) }" alt="${ esc( img.alt ) }" width="${ esc(
-				img.width
-			) }" height="${ esc( img.height ) }" data-width="${ esc(
-				img.width
+				imgWidth
+			) }" height="${ esc( imgHeight ) }" data-width="${ esc(
+				imgWidth
 			) }" data-height="${ esc(
-				img.height
+				imgHeight
 			) }" loading="lazy" decoding="async">${ linkClose }${ captionHtml }</figure>`;
 		} )
 		.join( '' );
@@ -186,6 +207,14 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 		.filter( Boolean )
 		.join( '\n' );
 
+	// Rich text, so it goes through the caption allowlist rather than esc().
+	// Escaping it would render tags as visible text and make the preview
+	// disagree with what render.php produces.
+	const safeGalleryCaption = sanitizeCaption( caption );
+	const galleryCaptionHtml = safeGalleryCaption
+		? `<figcaption class="wp-block-ph-gallery-display__caption">${ safeGalleryCaption }</figcaption>`
+		: '';
+
 	return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -194,17 +223,17 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 ${ css }
 <style>
   body { margin: 0; padding: 24px; box-sizing: border-box; background: #fff; }
-  .wp-block-ph-gallery-display { max-width: 100%; }
+  .wp-block-ph-gallery-display { max-width: 100%; margin: 0; }
   .ph-gallery-item { pointer-events: none; }
 </style>
 </head>
 <body>
-<div class="${ wrapperClass }"
+<figure class="${ wrapperClass }"
   data-layout="${ safeLayout }"
   data-columns="${ safeColumns }"
   data-row-height="${ safeRowHeight }"
   style="${ cssVars }"
->${ itemsHtml }</div>
+>${ itemsHtml }${ galleryCaptionHtml }</figure>
 ${ js }
 </body>
 </html>`;

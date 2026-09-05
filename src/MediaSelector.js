@@ -6,6 +6,20 @@ import { Button } from '@wordpress/components';
  * { id, url, width, height, alt, caption, title, link, filename } shape
  * used by the block.
  *
+ * An entry may also carry these optional fields, which the media library never
+ * sets but a transform from core/gallery can. render.php prefers them over the
+ * attachment's own values:
+ *
+ *   altOverride     {string}  alt text authored on the block, not the attachment
+ *   captionOverride {string}  caption authored on the block
+ *   isDecorative    {boolean} force alt="" — the image is decorative on purpose
+ *   linkTarget      {string}  link target, e.g. "_blank"
+ *   rel             {string}  link rel tokens
+ *
+ * Leaving them unset is what keeps the default behaviour: metadata is re-read
+ * from the media library at render time, so editing an attachment updates every
+ * gallery it appears in.
+ *
  * Everything but `id` is stored so the editor preview can show real layout
  * previews (Isotope, justified-layout), attachment links, and accessible
  * link names without a server round-trip. render.php re-fetches all metadata

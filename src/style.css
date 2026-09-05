@@ -13,6 +13,41 @@
 	--ph-gallery-ratio: 1/1;
 
 	box-sizing: border-box;
+
+	/*
+	 * The wrapper is a <figure> so the gallery caption can be a <figcaption>.
+	 * Browsers apply a default `figure { margin: 1em 40px }`, which would
+	 * visibly shift every existing gallery the moment this markup changed.
+	 */
+	margin: 0;
+}
+
+/*
+ * Alignments. The block supports every core align value, so left, right and
+ * center all have to behave — a theme cannot be relied on to style a block
+ * it does not know about.
+ */
+.wp-block-ph-gallery-display.aligncenter {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.wp-block-ph-gallery-display.alignleft {
+	float: left;
+	margin-right: 1.5em;
+}
+
+.wp-block-ph-gallery-display.alignright {
+	float: right;
+	margin-left: 1.5em;
+}
+
+/* Gallery-level caption, below the images. */
+.wp-block-ph-gallery-display__caption {
+	font-size: 0.875em;
+	line-height: 1.5;
+	margin-top: 0.75em;
+	text-align: center;
 }
 
 .ph-gallery-item {

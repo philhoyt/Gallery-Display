@@ -70,6 +70,116 @@ export function intInRange( value, fallback, min, max ) {
 	return Math.min( Math.max( n, min ), max );
 }
 
+// Tags the gallery caption may contain. Deliberately narrow: a caption needs
+// emphasis and links, nothing more. render.php filters the same value with
+// wp_kses_post(), which is broader, so anything allowed here is allowed there.
+const CAPTION_ALLOWED_TAGS = new Set( [ 'A', 'B', 'STRONG', 'I', 'EM', 'BR' ] );
+
+// Removed with their contents rather than unwrapped — their text is markup,
+// not caption prose.
+const CAPTION_DROP_TAGS = new Set( [
+	'SCRIPT',
+	'STYLE',
+	'IFRAME',
+	'OBJECT',
+	'EMBED',
+	'TEMPLATE',
+] );
+
+/**
+ * Whether an href is safe to keep on a caption link.
+ *
+ * @param {string} value Raw href.
+ * @return {boolean} True when the scheme is allowed.
+ */
+function isSafeHref( value ) {
+	// Strip control characters first: "java\u0000script:" and friends are
+	// otherwise re-joined by the browser after this check.
+	const raw = String( value ?? '' )
+		.replace( /[\u0000-\u0020]/g, '' )
+		.trim();
+
+	if ( '' === raw ) {
+		return false;
+	}
+	// Anything carrying an explicit scheme must be one we allow.
+	if ( /^[a-z][a-z0-9+.-]*:/i.test( raw ) ) {
+		return /^(?:https?|mailto|tel):/i.test( raw );
+	}
+	// Relative URLs and fragments are fine.
+	return true;
+}
+
+/**
+ * Recursively reduce a parsed fragment to the allowed caption subset.
+ *
+ * @param {Node} node Parent node whose children are sanitized in place.
+ */
+function sanitizeCaptionNode( node ) {
+	Array.from( node.childNodes ).forEach( ( child ) => {
+		// Text nodes are already inert.
+		if ( 3 === child.nodeType ) {
+			return;
+		}
+		// Comments, CDATA and anything else that is not an element.
+		if ( 1 !== child.nodeType ) {
+			child.remove();
+			return;
+		}
+
+		if ( CAPTION_DROP_TAGS.has( child.tagName ) ) {
+			child.remove();
+			return;
+		}
+
+		sanitizeCaptionNode( child );
+
+		if ( ! CAPTION_ALLOWED_TAGS.has( child.tagName ) ) {
+			// Unwrap: keep the text the author wrote, drop the element.
+			while ( child.firstChild ) {
+				node.insertBefore( child.firstChild, child );
+			}
+			child.remove();
+			return;
+		}
+
+		Array.from( child.attributes ).forEach( ( attr ) => {
+			const keep =
+				'A' === child.tagName &&
+				'href' === attr.name.toLowerCase() &&
+				isSafeHref( attr.value );
+			if ( ! keep ) {
+				child.removeAttribute( attr.name );
+			}
+		} );
+	} );
+}
+
+/**
+ * Sanitize the gallery caption for the preview document.
+ *
+ * The caption is rich text, so escaping it as plain text would show tags to
+ * the user and make the preview disagree with the front end. Passing it
+ * through untouched would reopen the injection path this module exists to
+ * close. Parsing into an inert document and keeping an allowlist does neither.
+ *
+ * @param {*} html Raw caption HTML.
+ * @return {string} Sanitized HTML.
+ */
+export function sanitizeCaption( html ) {
+	const raw = String( html ?? '' );
+	if ( '' === raw.trim() ) {
+		return '';
+	}
+	// DOMParser produces an inert document: no scripts run, no images load.
+	const doc = new DOMParser().parseFromString(
+		'<body>' + raw + '</body>',
+		'text/html'
+	);
+	sanitizeCaptionNode( doc.body );
+	return doc.body.innerHTML;
+}
+
 /**
  * Validate a CSS length, or the var(--wp--…) form produced from a WordPress
  * spacing preset.

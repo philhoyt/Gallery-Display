@@ -157,6 +157,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 			list( $full_url, $full_w, $full_h ) = array( $thumb_url, $thumb_w, $thumb_h );
 		}
 
+		// Overrides come from a block-level edit — today only a transform from
+		// core/gallery sets them. When one is absent the attachment is read as
+		// before, which is what keeps a media-library edit propagating to every
+		// gallery. An override is deliberately allowed to be an empty string:
+		// that is a real choice, distinct from "not set".
+		$alt_override     = $img_data['altOverride'] ?? null;
+		$caption_override = $img_data['captionOverride'] ?? null;
+		$is_decorative    = ! empty( $img_data['isDecorative'] );
+
+		$alt = is_string( $alt_override )
+			? $alt_override
+			: (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
+
+		// A decorative image is unlabelled on purpose. The link that may wrap
+		// it still needs an accessible name — see where the anchor is built.
+		if ( $is_decorative ) {
+			$alt = '';
+		}
+
+		$caption = is_string( $caption_override )
+			? $caption_override
+			: (string) wp_get_attachment_caption( $id );
+
 		$resolved[] = array(
 			'id'             => $id,
 			'thumb_url'      => $thumb_url,
@@ -165,12 +188,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 			'full_url'       => $full_url,
 			'full_w'         => (int) $full_w,
 			'full_h'         => (int) $full_h,
-			'alt'            => get_post_meta( $id, '_wp_attachment_image_alt', true ),
-			'caption'        => wp_get_attachment_caption( $id ),
+			'alt'            => $alt,
+			'is_decorative'  => $is_decorative,
+			'caption'        => $caption,
 			'title'          => $post->post_title,
 			'desc'           => $post->post_content,
 			'attachment_url' => get_permalink( $id ),
 			'post_date'      => $post->post_date,
+			'link_target'    => isset( $img_data['linkTarget'] ) ? (string) $img_data['linkTarget'] : '',
+			'link_rel'       => isset( $img_data['rel'] ) ? (string) $img_data['rel'] : '',
 		);
 	}
 
@@ -292,21 +318,37 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$extra_class .= ' has-caption caption-' . sanitize_html_class( $caption_position, 'below' );
 	}
 
-	$wrapper_attrs = get_block_wrapper_attributes(
-		array(
-			'class'           => $extra_class,
-			'data-layout'     => $layout,
-			'data-link-to'    => $link_to,
-			'data-columns'    => (string) $columns,
-			'data-row-height' => (string) $row_height,
-			'style'           => implode( ';', $css_vars ),
-		)
+	$wrapper_args = array(
+		'class'           => $extra_class,
+		'data-layout'     => $layout,
+		'data-link-to'    => $link_to,
+		'data-columns'    => (string) $columns,
+		'data-row-height' => (string) $row_height,
+		'style'           => implode( ';', $css_vars ),
 	);
+
+	// The anchor is emitted here rather than left to core's anchor block
+	// support: wp-includes/block-supports/anchor.php is @since 7.0.0, and this
+	// plugin supports WordPress 6.6, where it does not exist and the id would
+	// silently never render. On 7.0+ core produces the same value from the same
+	// attribute, so the two agree. get_block_wrapper_attributes() applies
+	// esc_attr() to the value, which is exactly what core's anchor support
+	// relies on, so duplicate-id behaviour matches core rather than being
+	// stricter.
+	$anchor = isset( $attributes['anchor'] ) ? trim( (string) $attributes['anchor'] ) : '';
+	if ( '' !== $anchor ) {
+		$wrapper_args['id'] = $anchor;
+	}
+
+	$wrapper_attrs = get_block_wrapper_attributes( $wrapper_args );
 
 	// 5. Output.
 
+	// A <figure> rather than a <div> so the gallery caption below can be a
+	// <figcaption>, which is only valid inside a figure. This is what
+	// core/gallery does. style.css resets the browser default figure margin.
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	printf( '<div %s>', $wrapper_attrs );
+	printf( '<figure %s>', $wrapper_attrs );
 
 	// Mosaic pattern: positions 0 and 3 within each group of 5 get the --large
 	// modifier (2/3 container width). Packery fills the remaining column.
@@ -349,12 +391,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 				break;
 		}
 
-		// The link's only content is the <img>. When the attachment has no alt
-		// text the image contributes no accessible name, leaving the link
-		// unnamed for screen-reader users (WCAG 2.4.4, 4.1.2). Fall back to the
-		// attachment title, then its caption. If none of the three exist the
-		// image really is unlabelled content, so there is nothing truthful to
-		// announce and alt="" correctly marks it decorative.
+		// The link's only content is the <img>. When the image has no alt text
+		// it contributes no accessible name, leaving the link unnamed for
+		// screen-reader users (WCAG 2.4.4, 4.1.2). Fall back to the attachment
+		// title, then its caption.
+		//
+		// This deliberately also applies to an image marked decorative. Being
+		// decorative is a statement about the image, not about the link that
+		// wraps it — a link still needs a name. Skipping the fallback here
+		// would recreate the very failure this check was added to fix.
 		if ( $href && '' === trim( (string) $img['alt'] ) ) {
 			$link_label = $img['title'] ? $img['title'] : $img['caption'];
 			if ( $link_label ) {
@@ -363,6 +408,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 		}
 
 		if ( $href ) {
+			// Validate rather than merely escape. esc_attr() would stop an
+			// attribute breaking out, but would happily emit target="evil" or a
+			// rel that drops noopener.
+			$allowed_targets = array( '_blank', '_self', '_parent', '_top' );
+			$link_target     = in_array( $img['link_target'], $allowed_targets, true )
+				? $img['link_target']
+				: '';
+
+			$rel_tokens = preg_split( '/\s+/', strtolower( $img['link_rel'] ), -1, PREG_SPLIT_NO_EMPTY );
+			$rel_tokens = is_array( $rel_tokens ) ? $rel_tokens : array();
+
+			// Appended last and after de-duplication, so a crafted rel cannot
+			// remove it from a link that opens in a new tab.
+			if ( '_blank' === $link_target ) {
+				$rel_tokens[] = 'noopener';
+			}
+
+			$rel_tokens = array_unique( $rel_tokens );
+
+			if ( $link_target ) {
+				$link_extras .= ' target="' . esc_attr( $link_target ) . '"';
+			}
+			if ( $rel_tokens ) {
+				$link_extras .= ' rel="' . esc_attr( implode( ' ', $rel_tokens ) ) . '"';
+			}
+
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			printf( '<a href="%s" class="ph-gallery-item__link"%s>', $href, $link_extras );
 		}
@@ -400,5 +471,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 		echo '</figure>';
 	}
 
-	echo '</div>';
+	// Gallery-level caption, last so it sits below the images. Rich text, as in
+	// core/gallery, so it is filtered with wp_kses_post() rather than flattened
+	// to plain text — the editor preview applies a matching allowlist.
+	$gallery_caption = isset( $attributes['caption'] ) ? (string) $attributes['caption'] : '';
+	if ( '' !== trim( $gallery_caption ) ) {
+		printf(
+			'<figcaption class="wp-block-ph-gallery-display__caption">%s</figcaption>',
+			wp_kses_post( $gallery_caption )
+		);
+	}
+
+	echo '</figure>';
 } )( $attributes );
