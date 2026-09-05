@@ -2,36 +2,14 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 import { Placeholder, Button, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 
 import Inspector from './inspector';
 import MediaSelector from './MediaSelector';
+import { esc, cssIdent, cssRatio, cssLength, intInRange } from './sanitize';
 
 const MOSAIC_LARGE = new Set( [ 0, 3 ] );
 
-/**
- * Escape a value for use inside an HTML attribute (double-quoted).
- *
- * @param {*} val
- * @return {string}
- */
-function esc( val ) {
-	return String( val ?? '' )
-		.replace( /&/g, '&amp;' )
-		.replace( /</g, '&lt;' )
-		.replace( />/g, '&gt;' )
-		.replace( /"/g, '&quot;' );
-}
-
-/**
- * Build a full standalone HTML document that renders the gallery using
- * the real frontend CSS and JS files, loaded from absolute URLs.
- * This is served as the iframe srcdoc so the preview always reflects
- * the current (unsaved) attributes with no server round-trip.
- *
- * @param {Object} attributes Block attributes.
- * @param {string} pluginUrl  Absolute URL to the plugin root (trailing slash).
- * @return {string} Full HTML document.
- */
 /**
  * Resolve a blockGap attribute value to a concrete CSS length string.
  *
@@ -58,10 +36,25 @@ function resolveGapValue( raw ) {
 	document.documentElement.appendChild( tmp );
 	const px = tmp.offsetWidth;
 	document.documentElement.removeChild( tmp );
-	return Number.isFinite( px ) ? px + 'px' : cssValue;
+	// Fall back to the CSS value itself if the measurement produced nothing
+	// useful, but only after validating it — `raw` is an unvalidated attribute.
+	return px > 0 ? px + 'px' : cssLength( cssValue, '16px' );
 }
 
-function buildPreviewDoc( attributes, pluginUrl ) {
+/**
+ * Build a full standalone HTML document that renders the gallery using
+ * the real frontend CSS and JS files, loaded from absolute URLs.
+ * This is served as the iframe srcdoc so the preview always reflects
+ * the current (unsaved) attributes with no server round-trip.
+ *
+ * Every attribute reaching this document is escaped or validated first —
+ * see sanitize.js for why.
+ *
+ * @param {Object} attributes Block attributes.
+ * @param {string} pluginUrl  Absolute URL to the plugin root (trailing slash).
+ * @return {string} Full HTML document.
+ */
+export function buildPreviewDoc( attributes, pluginUrl ) {
 	const {
 		images,
 		layout,
@@ -74,41 +67,60 @@ function buildPreviewDoc( attributes, pluginUrl ) {
 		style: blockStyle,
 	} = attributes;
 
+	// Validate every attribute that reaches the document before use.
+	const safeLayout   = cssIdent( layout, 'grid' );
+	const safeCaption  = cssIdent( captionPosition, 'below' );
+	const safeRatio    = cssRatio( aspectRatio, '1/1' );
+	const safeColumns  = intInRange( columns, 3, 1, 6 );
+	const safeRowHeight = intInRange( rowHeight, 200, 80, 500 );
 	const gap = resolveGapValue( blockStyle?.spacing?.blockGap );
 
 	const cssVars = [
-		`--ph-gallery-columns:${ columns }`,
-		`--ph-gallery-row-height:${ rowHeight }px`,
-		`--ph-gallery-ratio:${ aspectRatio }`,
+		`--ph-gallery-columns:${ safeColumns }`,
+		`--ph-gallery-row-height:${ safeRowHeight }px`,
+		`--ph-gallery-ratio:${ safeRatio }`,
 		`--ph-gallery-gap:${ gap }`,
 	].join( ';' );
 
 	const wrapperClass = [
 		'wp-block-ph-gallery-display',
-		`is-layout-${ layout }`,
-		showCaption ? `has-caption caption-${ captionPosition }` : '',
+		`is-layout-${ safeLayout }`,
+		showCaption ? `has-caption caption-${ safeCaption }` : '',
 	].filter( Boolean ).join( ' ' );
 
 	// Build figure items.
 	const itemsHtml = images
 		.map( ( img, i ) => {
-			const isLarge = layout === 'mosaic' && MOSAIC_LARGE.has( i % 5 );
+			const isLarge = safeLayout === 'mosaic' && MOSAIC_LARGE.has( i % 5 );
 			const itemClass = isLarge
 				? 'ph-gallery-item ph-gallery-item--large'
 				: 'ph-gallery-item';
 
+			// render.php falls back to the thumbnail alt/title for the link's
+			// accessible name; mirror that here so the preview matches.
+			const linkLabel = img.alt || img.caption || img.title || '';
+			const labelAttr = linkLabel
+				? ''
+				: ` aria-label="${ esc( img.filename || 'Image' ) }"`;
+
 			let linkOpen  = '';
 			let linkClose = '';
 			if ( linkTo === 'lightbox' ) {
-				linkOpen = `<a href="${ esc( img.url ) }" class="ph-gallery-item__link" data-pswp-width="${ esc( img.width ) }" data-pswp-height="${ esc( img.height ) }">`;
+				linkOpen = `<a href="${ esc( img.url ) }" class="ph-gallery-item__link"${ labelAttr } data-pswp-width="${ esc( img.width ) }" data-pswp-height="${ esc( img.height ) }">`;
 				linkClose = '</a>';
 			} else if ( linkTo === 'media' ) {
-				linkOpen  = `<a href="${ esc( img.url ) }" class="ph-gallery-item__link">`;
+				linkOpen  = `<a href="${ esc( img.url ) }" class="ph-gallery-item__link"${ labelAttr }>`;
+				linkClose = '</a>';
+			} else if ( linkTo === 'attachment' ) {
+				// `link` is the attachment page URL, stored by MediaSelector.
+				// Older galleries saved before that was stored fall back to the
+				// file URL — the preview's links are inert either way.
+				linkOpen  = `<a href="${ esc( img.link || img.url ) }" class="ph-gallery-item__link"${ labelAttr }>`;
 				linkClose = '</a>';
 			}
 
 			const captionHtml =
-				showCaption && img.caption && layout !== 'list'
+				showCaption && img.caption && safeLayout !== 'list'
 					? `<figcaption class="ph-gallery-item__caption">${ esc( img.caption ) }</figcaption>`
 					: '';
 
@@ -117,21 +129,23 @@ function buildPreviewDoc( attributes, pluginUrl ) {
 		.join( '' );
 
 	// CSS.
-	const b = pluginUrl + 'build/';
+	const b = esc( pluginUrl ) + 'build/';
+	const extraStylesheets = applyFilters( 'galleryDisplay.previewStylesheets', [], safeLayout );
 	const css = [
 		`<link rel="stylesheet" href="${ b }style-index.css">`,
-		`<link rel="stylesheet" href="${ b }styles/${ layout }.css">`,
+		`<link rel="stylesheet" href="${ b }styles/${ safeLayout }.css">`,
 		linkTo === 'lightbox'
 			? `<link rel="stylesheet" href="${ b }frontend/init-lightbox.css">`
 			: '',
+		...extraStylesheets.map( ( url ) => `<link rel="stylesheet" href="${ esc( url ) }">` ),
 	].filter( Boolean ).join( '\n' );
 
 	// JS — defer so the DOM is ready before init scripts run.
 	const js = [
-		layout === 'masonry' || layout === 'mosaic'
-			? `<script src="${ b }frontend/isotope.js" defer></script>\n<script src="${ b }frontend/init-${ layout }.js" defer></script>`
+		safeLayout === 'masonry' || safeLayout === 'mosaic'
+			? `<script src="${ b }frontend/isotope.js" defer></script>\n<script src="${ b }frontend/init-${ safeLayout }.js" defer></script>`
 			: '',
-		layout === 'justified'
+		safeLayout === 'justified'
 			? `<script src="${ b }frontend/justified-layout.js" defer></script>\n<script src="${ b }frontend/init-justified.js" defer></script>`
 			: '',
 		linkTo === 'lightbox'
@@ -148,13 +162,14 @@ ${ css }
 <style>
   body { margin: 0; padding: 24px; box-sizing: border-box; background: #fff; }
   .wp-block-ph-gallery-display { max-width: 100%; }
+  .ph-gallery-item { pointer-events: none; }
 </style>
 </head>
 <body>
 <div class="${ wrapperClass }"
-  data-layout="${ esc( layout ) }"
-  data-columns="${ esc( columns ) }"
-  data-row-height="${ esc( rowHeight ) }"
+  data-layout="${ safeLayout }"
+  data-columns="${ safeColumns }"
+  data-row-height="${ safeRowHeight }"
   style="${ cssVars }"
 >${ itemsHtml }</div>
 ${ js }
@@ -254,8 +269,16 @@ export default function Edit( { attributes, setAttributes } ) {
 					size="fill"
 					className="ph-gallery-display-preview-modal"
 				>
+					{ /*
+					   allow-scripts without allow-same-origin gives the
+					   preview an opaque origin, so nothing inside it can
+					   reach wp-admin even if a crafted attribute slips
+					   past the sanitizers. The layout libraries and
+					   PhotoSwipe only need script execution.
+					*/ }
 					<iframe
 						srcDoc={ previewDoc }
+						sandbox="allow-scripts"
 						title={ __( 'Gallery Preview', 'gallery-display' ) }
 						className="ph-gallery-display-preview-modal__iframe"
 					/>

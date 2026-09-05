@@ -3,12 +3,13 @@ import { Button } from '@wordpress/components';
 
 /**
  * Opens the media library in gallery mode and maps selections to the
- * { id, url, width, height, alt, caption } shape used by the block.
+ * { id, url, width, height, alt, caption, title, link, filename } shape
+ * used by the block.
  *
- * width / height / alt / caption are stored so the editor JS render can
- * show real layout previews (Isotope, justified-layout) without a server
- * round-trip. render.php re-fetches all metadata at render time so the
- * stored values here are editor-only conveniences.
+ * Everything but `id` is stored so the editor preview can show real layout
+ * previews (Isotope, justified-layout), attachment links, and accessible
+ * link names without a server round-trip. render.php re-fetches all metadata
+ * at render time, so the stored values here are editor-only conveniences.
  *
  * URL preference: medium → thumbnail → original.
  *
@@ -29,12 +30,15 @@ export default function MediaSelector( { images, onSelect, buttonLabel } ) {
 				null;
 
 			return {
-				id:      m.id,
-				url:     size?.url    ?? m.url,
-				width:   size?.width  ?? m.width  ?? 0,
-				height:  size?.height ?? m.height ?? 0,
-				alt:     m.alt     ?? '',
-				caption: m.caption ?? '',
+				id:       m.id,
+				url:      size?.url    ?? m.url,
+				width:    size?.width  ?? m.width  ?? 0,
+				height:   size?.height ?? m.height ?? 0,
+				alt:      m.alt      ?? '',
+				caption:  m.caption  ?? '',
+				title:    m.title    ?? '',
+				link:     m.link     ?? '',
+				filename: m.filename ?? '',
 			};
 		} );
 		onSelect( mapped );
