@@ -67,6 +67,9 @@
 		"caption": {
 			"type": "string",
 			"default": ""
+		},
+		"anchor": {
+			"type": "string"
 		}
 	},
 	"supports": {

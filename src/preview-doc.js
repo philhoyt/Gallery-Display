@@ -7,6 +7,7 @@
  */
 
 import { applyFilters } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
 
 import {
 	esc,
@@ -124,7 +125,9 @@ export function buildPreviewDoc( attributes, pluginUrl, dimensions = {} ) {
 			const linkLabel = img.alt || img.caption || img.title || '';
 			const labelAttr = linkLabel
 				? ''
-				: ` aria-label="${ esc( img.filename || 'Image' ) }"`;
+				: ` aria-label="${ esc(
+						img.filename || __( 'Image', 'gallery-display' )
+				  ) }"`;
 
 			let linkOpen = '';
 			let linkClose = '';
