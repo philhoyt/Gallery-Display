@@ -7,7 +7,14 @@
 	"category": "media",
 	"icon": "format-gallery",
 	"description": "A flexible image gallery with grid, masonry, mosaic, justified, and list layouts.",
-	"keywords": [ "gallery", "images", "photos", "masonry", "mosaic", "justified" ],
+	"keywords": [
+		"gallery",
+		"images",
+		"photos",
+		"masonry",
+		"mosaic",
+		"justified"
+	],
 	"textdomain": "gallery-display",
 	"attributes": {
 		"images": {

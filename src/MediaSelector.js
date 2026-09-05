@@ -24,20 +24,17 @@ export default function MediaSelector( { images, onSelect, buttonLabel } ) {
 	function handleSelect( media ) {
 		const selected = Array.isArray( media ) ? media : [ media ];
 		const mapped = selected.map( ( m ) => {
-			const size =
-				m.sizes?.medium ??
-				m.sizes?.thumbnail ??
-				null;
+			const size = m.sizes?.medium ?? m.sizes?.thumbnail ?? null;
 
 			return {
-				id:       m.id,
-				url:      size?.url    ?? m.url,
-				width:    size?.width  ?? m.width  ?? 0,
-				height:   size?.height ?? m.height ?? 0,
-				alt:      m.alt      ?? '',
-				caption:  m.caption  ?? '',
-				title:    m.title    ?? '',
-				link:     m.link     ?? '',
+				id: m.id,
+				url: size?.url ?? m.url,
+				width: size?.width ?? m.width ?? 0,
+				height: size?.height ?? m.height ?? 0,
+				alt: m.alt ?? '',
+				caption: m.caption ?? '',
+				title: m.title ?? '',
+				link: m.link ?? '',
 				filename: m.filename ?? '',
 			};
 		} );

@@ -7,4 +7,4 @@
 
 import justifiedLayout from 'justified-layout';
 
-window.JustifiedLayoutLib = justifiedLayout; // eslint-disable-line no-undef
+window.JustifiedLayoutLib = justifiedLayout;

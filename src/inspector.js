@@ -13,29 +13,35 @@ import { applyFilters } from '@wordpress/hooks';
 import MediaSelector from './MediaSelector';
 
 const DEFAULT_LAYOUTS = [
-	{ value: 'grid',      label: __( 'Grid', 'gallery-display' ) },
-	{ value: 'masonry',   label: __( 'Masonry', 'gallery-display' ) },
-	{ value: 'mosaic',    label: __( 'Mosaic', 'gallery-display' ) },
+	{ value: 'grid', label: __( 'Grid', 'gallery-display' ) },
+	{ value: 'masonry', label: __( 'Masonry', 'gallery-display' ) },
+	{ value: 'mosaic', label: __( 'Mosaic', 'gallery-display' ) },
 	{ value: 'justified', label: __( 'Justified', 'gallery-display' ) },
-	{ value: 'list',      label: __( 'List', 'gallery-display' ) },
+	{ value: 'list', label: __( 'List', 'gallery-display' ) },
 ];
 
 const ASPECT_RATIOS = [
-	{ value: '1/1',  label: __( '1:1 — Square', 'gallery-display' ) },
-	{ value: '4/3',  label: __( '4:3', 'gallery-display' ) },
-	{ value: '3/2',  label: __( '3:2', 'gallery-display' ) },
+	{ value: '1/1', label: __( '1:1 — Square', 'gallery-display' ) },
+	{ value: '4/3', label: __( '4:3', 'gallery-display' ) },
+	{ value: '3/2', label: __( '3:2', 'gallery-display' ) },
 	{ value: '16/9', label: __( '16:9', 'gallery-display' ) },
-	{ value: '3/4',  label: __( '3:4 — Portrait', 'gallery-display' ) },
+	{ value: '3/4', label: __( '3:4 — Portrait', 'gallery-display' ) },
 	{ value: '9/16', label: __( '9:16 — Tall Portrait', 'gallery-display' ) },
 ];
 
 const ORDER_OPTIONS = [
-	{ value: 'default',    label: __( 'Default (manual)', 'gallery-display' ) },
-	{ value: 'date-asc',   label: __( 'Date (oldest first)', 'gallery-display' ) },
-	{ value: 'date-desc',  label: __( 'Date (newest first)', 'gallery-display' ) },
-	{ value: 'title-asc',  label: __( 'Title (A–Z)', 'gallery-display' ) },
+	{ value: 'default', label: __( 'Default (manual)', 'gallery-display' ) },
+	{
+		value: 'date-asc',
+		label: __( 'Date (oldest first)', 'gallery-display' ),
+	},
+	{
+		value: 'date-desc',
+		label: __( 'Date (newest first)', 'gallery-display' ),
+	},
+	{ value: 'title-asc', label: __( 'Title (A–Z)', 'gallery-display' ) },
 	{ value: 'title-desc', label: __( 'Title (Z–A)', 'gallery-display' ) },
-	{ value: 'rand',       label: __( 'Random', 'gallery-display' ) },
+	{ value: 'rand', label: __( 'Random', 'gallery-display' ) },
 ];
 
 const ORDER_OPTIONS_MOSAIC = [
@@ -47,9 +53,9 @@ const ORDER_OPTIONS_MOSAIC = [
 // translated fallback matters, so these are localized like every other label.
 const FALLBACK_SIZES = [
 	{ value: 'thumbnail', label: __( 'Thumbnail', 'gallery-display' ) },
-	{ value: 'medium',    label: __( 'Medium', 'gallery-display' ) },
-	{ value: 'large',     label: __( 'Large', 'gallery-display' ) },
-	{ value: 'full',      label: __( 'Full Size', 'gallery-display' ) },
+	{ value: 'medium', label: __( 'Medium', 'gallery-display' ) },
+	{ value: 'large', label: __( 'Large', 'gallery-display' ) },
+	{ value: 'full', label: __( 'Full Size', 'gallery-display' ) },
 ];
 
 export default function Inspector( { attributes, setAttributes } ) {
@@ -89,7 +95,6 @@ export default function Inspector( { attributes, setAttributes } ) {
 
 	return (
 		<InspectorControls>
-
 			{ /* ----------------------------------------------------------------
 			     Layout Panel
 			     ---------------------------------------------------------------- */ }
@@ -101,7 +106,10 @@ export default function Inspector( { attributes, setAttributes } ) {
 					__nextHasNoMarginBottom
 					label={ __( 'Layout', 'gallery-display' ) }
 					value={ layout }
-					options={ applyFilters( 'galleryDisplay.layouts', DEFAULT_LAYOUTS ) }
+					options={ applyFilters(
+						'galleryDisplay.layouts',
+						DEFAULT_LAYOUTS
+					) }
 					onChange={ ( v ) => setAttributes( { layout: v } ) }
 				/>
 
@@ -122,7 +130,9 @@ export default function Inspector( { attributes, setAttributes } ) {
 						label={ __( 'Aspect Ratio', 'gallery-display' ) }
 						value={ aspectRatio }
 						options={ ASPECT_RATIOS }
-						onChange={ ( v ) => setAttributes( { aspectRatio: v } ) }
+						onChange={ ( v ) =>
+							setAttributes( { aspectRatio: v } )
+						}
 					/>
 				) }
 
@@ -141,7 +151,11 @@ export default function Inspector( { attributes, setAttributes } ) {
 					__nextHasNoMarginBottom
 					label={ __( 'Order', 'gallery-display' ) }
 					value={ orderBy }
-					options={ layout === 'mosaic' ? ORDER_OPTIONS_MOSAIC : ORDER_OPTIONS }
+					options={
+						layout === 'mosaic'
+							? ORDER_OPTIONS_MOSAIC
+							: ORDER_OPTIONS
+					}
 					onChange={ ( v ) => setAttributes( { orderBy: v } ) }
 				/>
 			</PanelBody>
@@ -244,7 +258,6 @@ export default function Inspector( { attributes, setAttributes } ) {
 					/>
 				) }
 			</PanelBody>
-
 		</InspectorControls>
 	);
 }

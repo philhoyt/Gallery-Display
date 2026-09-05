@@ -11,17 +11,19 @@
 import { getGapPx, onWidthChange } from './gap';
 
 document.addEventListener( 'DOMContentLoaded', () => {
-	const Isotope = window.IsotopeLib; // eslint-disable-line no-undef
+	const Isotope = window.IsotopeLib;
 	if ( ! Isotope ) {
 		return;
 	}
 
 	document
-		.querySelectorAll( '.wp-block-ph-gallery-display[data-layout="mosaic"]' )
+		.querySelectorAll(
+			'.wp-block-ph-gallery-display[data-layout="mosaic"]'
+		)
 		.forEach( ( gallery ) => {
-			const gap     = getGapPx( gallery );
+			const gap = getGapPx( gallery );
 			const columns = parseInt( gallery.dataset.columns, 10 ) || 3;
-			const items   = gallery.querySelectorAll( '.ph-gallery-item' );
+			const items = gallery.querySelectorAll( '.ph-gallery-item' );
 
 			function cellWidth() {
 				const containerWidth = gallery.offsetWidth;
@@ -33,7 +35,9 @@ document.addEventListener( 'DOMContentLoaded', () => {
 					const isLarge = item.classList.contains(
 						'ph-gallery-item--large'
 					);
-					item.style.width        = isLarge ? width * 2 + gap + 'px' : width + 'px';
+					item.style.width = isLarge
+						? width * 2 + gap + 'px'
+						: width + 'px';
 					item.style.marginBottom = gap + 'px';
 				} );
 			}
@@ -42,7 +46,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 			const iso = new Isotope( gallery, {
 				itemSelector: '.ph-gallery-item',
-				layoutMode:   'packery',
+				layoutMode: 'packery',
 				packery: {
 					gutter: gap,
 				},
@@ -61,7 +65,9 @@ document.addEventListener( 'DOMContentLoaded', () => {
 				if ( img.complete ) {
 					return;
 				}
-				img.addEventListener( 'load', () => iso.layout(), { once: true } );
+				img.addEventListener( 'load', () => iso.layout(), {
+					once: true,
+				} );
 			} );
 		} );
 } );

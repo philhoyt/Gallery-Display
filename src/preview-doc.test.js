@@ -84,15 +84,18 @@ describe( 'buildPreviewDoc', () => {
 		[ 'aspectRatio', { aspectRatio: BREAKOUT } ],
 		[ 'columns', { columns: BREAKOUT } ],
 		[ 'rowHeight', { rowHeight: BREAKOUT } ],
-	] )( 'does not let a hostile %s escape its attribute', ( _name, override ) => {
-		const parsed = parse(
-			buildPreviewDoc( baseAttributes( override ), PLUGIN_URL )
-		);
+	] )(
+		'does not let a hostile %s escape its attribute',
+		( _name, override ) => {
+			const parsed = parse(
+				buildPreviewDoc( baseAttributes( override ), PLUGIN_URL )
+			);
 
-		expect( eventHandlerAttributes( parsed ) ).toEqual( [] );
-		// One image in, one image out — nothing was injected.
-		expect( parsed.querySelectorAll( 'img' ) ).toHaveLength( 1 );
-	} );
+			expect( eventHandlerAttributes( parsed ) ).toEqual( [] );
+			// One image in, one image out — nothing was injected.
+			expect( parsed.querySelectorAll( 'img' ) ).toHaveLength( 1 );
+		}
+	);
 
 	it( 'escapes hostile image fields', () => {
 		const doc = buildPreviewDoc(

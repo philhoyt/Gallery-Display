@@ -70,10 +70,10 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 	} = attributes;
 
 	// Validate every attribute that reaches the document before use.
-	const safeLayout   = cssIdent( layout, 'grid' );
-	const safeCaption  = cssIdent( captionPosition, 'below' );
-	const safeRatio    = cssRatio( aspectRatio, '1/1' );
-	const safeColumns  = intInRange( columns, 3, 1, 6 );
+	const safeLayout = cssIdent( layout, 'grid' );
+	const safeCaption = cssIdent( captionPosition, 'below' );
+	const safeRatio = cssRatio( aspectRatio, '1/1' );
+	const safeColumns = intInRange( columns, 3, 1, 6 );
 	const safeRowHeight = intInRange( rowHeight, 200, 80, 500 );
 	const gap = resolveGapValue( blockStyle?.spacing?.blockGap );
 
@@ -88,12 +88,15 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 		'wp-block-ph-gallery-display',
 		`is-layout-${ safeLayout }`,
 		showCaption ? `has-caption caption-${ safeCaption }` : '',
-	].filter( Boolean ).join( ' ' );
+	]
+		.filter( Boolean )
+		.join( ' ' );
 
 	// Build figure items.
 	const itemsHtml = images
 		.map( ( img, i ) => {
-			const isLarge = safeLayout === 'mosaic' && MOSAIC_LARGE.has( i % 5 );
+			const isLarge =
+				safeLayout === 'mosaic' && MOSAIC_LARGE.has( i % 5 );
 			const itemClass = isLarge
 				? 'ph-gallery-item ph-gallery-item--large'
 				: 'ph-gallery-item';
@@ -105,42 +108,68 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 				? ''
 				: ` aria-label="${ esc( img.filename || 'Image' ) }"`;
 
-			let linkOpen  = '';
+			let linkOpen = '';
 			let linkClose = '';
 			if ( linkTo === 'lightbox' ) {
-				linkOpen = `<a href="${ esc( img.url ) }" class="ph-gallery-item__link"${ labelAttr } data-pswp-width="${ esc( img.width ) }" data-pswp-height="${ esc( img.height ) }">`;
+				linkOpen = `<a href="${ esc(
+					img.url
+				) }" class="ph-gallery-item__link"${ labelAttr } data-pswp-width="${ esc(
+					img.width
+				) }" data-pswp-height="${ esc( img.height ) }">`;
 				linkClose = '</a>';
 			} else if ( linkTo === 'media' ) {
-				linkOpen  = `<a href="${ esc( img.url ) }" class="ph-gallery-item__link"${ labelAttr }>`;
+				linkOpen = `<a href="${ esc(
+					img.url
+				) }" class="ph-gallery-item__link"${ labelAttr }>`;
 				linkClose = '</a>';
 			} else if ( linkTo === 'attachment' ) {
 				// `link` is the attachment page URL, stored by MediaSelector.
 				// Older galleries saved before that was stored fall back to the
 				// file URL — the preview's links are inert either way.
-				linkOpen  = `<a href="${ esc( img.link || img.url ) }" class="ph-gallery-item__link"${ labelAttr }>`;
+				linkOpen = `<a href="${ esc(
+					img.link || img.url
+				) }" class="ph-gallery-item__link"${ labelAttr }>`;
 				linkClose = '</a>';
 			}
 
 			const captionHtml =
 				showCaption && img.caption && safeLayout !== 'list'
-					? `<figcaption class="ph-gallery-item__caption">${ esc( img.caption ) }</figcaption>`
+					? `<figcaption class="ph-gallery-item__caption">${ esc(
+							img.caption
+					  ) }</figcaption>`
 					: '';
 
-			return `<figure class="${ itemClass }">${ linkOpen }<img src="${ esc( img.url ) }" alt="${ esc( img.alt ) }" width="${ esc( img.width ) }" height="${ esc( img.height ) }" data-width="${ esc( img.width ) }" data-height="${ esc( img.height ) }" loading="lazy" decoding="async">${ linkClose }${ captionHtml }</figure>`;
+			return `<figure class="${ itemClass }">${ linkOpen }<img src="${ esc(
+				img.url
+			) }" alt="${ esc( img.alt ) }" width="${ esc(
+				img.width
+			) }" height="${ esc( img.height ) }" data-width="${ esc(
+				img.width
+			) }" data-height="${ esc(
+				img.height
+			) }" loading="lazy" decoding="async">${ linkClose }${ captionHtml }</figure>`;
 		} )
 		.join( '' );
 
 	// CSS.
 	const b = esc( pluginUrl ) + 'build/';
-	const extraStylesheets = applyFilters( 'galleryDisplay.previewStylesheets', [], safeLayout );
+	const extraStylesheets = applyFilters(
+		'galleryDisplay.previewStylesheets',
+		[],
+		safeLayout
+	);
 	const css = [
 		`<link rel="stylesheet" href="${ b }style-index.css">`,
 		`<link rel="stylesheet" href="${ b }styles/${ safeLayout }.css">`,
 		linkTo === 'lightbox'
 			? `<link rel="stylesheet" href="${ b }frontend/init-lightbox.css">`
 			: '',
-		...extraStylesheets.map( ( url ) => `<link rel="stylesheet" href="${ esc( url ) }">` ),
-	].filter( Boolean ).join( '\n' );
+		...extraStylesheets.map(
+			( url ) => `<link rel="stylesheet" href="${ esc( url ) }">`
+		),
+	]
+		.filter( Boolean )
+		.join( '\n' );
 
 	// JS — defer so the DOM is ready before init scripts run.
 	const js = [
@@ -153,7 +182,9 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 		linkTo === 'lightbox'
 			? `<script src="${ b }frontend/init-lightbox.js" defer></script>`
 			: '',
-	].filter( Boolean ).join( '\n' );
+	]
+		.filter( Boolean )
+		.join( '\n' );
 
 	return `<!DOCTYPE html>
 <html lang="en">

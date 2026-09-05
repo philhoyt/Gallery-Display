@@ -12,6 +12,7 @@
 }
 
 .is-layout-mosaic .ph-gallery-item {
+
 	/* Pixel width set by init-mosaic.js */
 	aspect-ratio: 1/1;
 	overflow: hidden;

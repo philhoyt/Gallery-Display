@@ -16,11 +16,13 @@ import PhotoSwipe from 'photoswipe';
 
 document.addEventListener( 'DOMContentLoaded', () => {
 	document
-		.querySelectorAll( '.wp-block-ph-gallery-display[data-link-to="lightbox"]' )
+		.querySelectorAll(
+			'.wp-block-ph-gallery-display[data-link-to="lightbox"]'
+		)
 		.forEach( ( gallery ) => {
 			const lightbox = new PhotoSwipeLightbox( {
 				gallery,
-				children:   'a.ph-gallery-item__link',
+				children: 'a.ph-gallery-item__link',
 				pswpModule: PhotoSwipe,
 			} );
 

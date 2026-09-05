@@ -1,19 +1,17 @@
-/**
+/*
  * ESLint configuration.
  *
- * @wordpress/scripts 30 bundles ESLint 8, which uses this legacy format.
- * Moving to @wordpress/scripts 32+ means migrating this file to
- * eslint.config.js flat config.
+ * wp-scripts 30 bundles ESLint 8, which uses this legacy format. Moving to
+ * wp-scripts 32 or later means migrating this file to eslint.config.js
+ * flat config.
  */
 module.exports = {
 	extends: [ 'plugin:@wordpress/eslint-plugin/recommended' ],
-	globals: {
-		// Set by wp_add_inline_script in gallery-display.php.
-		GalleryDisplayPluginUrl: 'readonly',
-		// Set by the bundled library entry points (isotope.js,
-		// justified-layout.js) for the init scripts to read.
-		IsotopeLib: 'writable',
-		JustifiedLayoutLib: 'writable',
+	env: {
+		// Everything here ships to the browser: the frontend initializers use
+		// getComputedStyle and ResizeObserver, and the editor code reads
+		// window.GalleryDisplayPluginUrl set by wp_add_inline_script.
+		browser: true,
 	},
 	overrides: [
 		{

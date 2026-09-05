@@ -17,18 +17,21 @@ export default function Edit( { attributes, setAttributes } ) {
 	const [ isPreviewOpen, setIsPreviewOpen ] = useState( false );
 
 	// Set by wp_add_inline_script in gallery-display.php.
-	// eslint-disable-next-line no-undef
 	const pluginUrl = window.GalleryDisplayPluginUrl ?? '';
 
-	const previewDoc = images?.length && pluginUrl
-		? buildPreviewDoc( attributes, pluginUrl )
-		: null;
+	const previewDoc =
+		images?.length && pluginUrl
+			? buildPreviewDoc( attributes, pluginUrl )
+			: null;
 
 	// --- Empty state ---
 	if ( ! images || images.length === 0 ) {
 		return (
 			<>
-				<Inspector attributes={ attributes } setAttributes={ setAttributes } />
+				<Inspector
+					attributes={ attributes }
+					setAttributes={ setAttributes }
+				/>
 				<div { ...blockProps }>
 					<Placeholder
 						icon="format-gallery"
@@ -43,7 +46,10 @@ export default function Edit( { attributes, setAttributes } ) {
 							onSelect={ ( selected ) =>
 								setAttributes( { images: selected } )
 							}
-							buttonLabel={ __( 'Add Images', 'gallery-display' ) }
+							buttonLabel={ __(
+								'Add Images',
+								'gallery-display'
+							) }
 						/>
 					</Placeholder>
 				</div>
@@ -54,7 +60,10 @@ export default function Edit( { attributes, setAttributes } ) {
 	// --- Gallery editor ---
 	return (
 		<>
-			<Inspector attributes={ attributes } setAttributes={ setAttributes } />
+			<Inspector
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+			/>
 			<div { ...blockProps }>
 				<div className="ph-gallery-display-editor__thumbs">
 					{ images.map( ( img ) => (
@@ -68,8 +77,7 @@ export default function Edit( { attributes, setAttributes } ) {
 				</div>
 				<div className="ph-gallery-display-editor__footer">
 					<span className="ph-gallery-display-editor__meta">
-						{ images.length }{ ' ' }
-						{ __( 'images', 'gallery-display' ) }
+						{ images.length } { __( 'images', 'gallery-display' ) }
 						{ ' · ' }
 						{ layout }
 					</span>
@@ -79,7 +87,10 @@ export default function Edit( { attributes, setAttributes } ) {
 							onSelect={ ( selected ) =>
 								setAttributes( { images: selected } )
 							}
-							buttonLabel={ __( 'Edit Gallery', 'gallery-display' ) }
+							buttonLabel={ __(
+								'Edit Gallery',
+								'gallery-display'
+							) }
 						/>
 						<Button
 							variant="secondary"

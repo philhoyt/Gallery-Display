@@ -12,17 +12,19 @@
 import { getGapPx, onWidthChange } from './gap';
 
 document.addEventListener( 'DOMContentLoaded', () => {
-	const Isotope = window.IsotopeLib; // eslint-disable-line no-undef
+	const Isotope = window.IsotopeLib;
 	if ( ! Isotope ) {
 		return;
 	}
 
 	document
-		.querySelectorAll( '.wp-block-ph-gallery-display[data-layout="masonry"]' )
+		.querySelectorAll(
+			'.wp-block-ph-gallery-display[data-layout="masonry"]'
+		)
 		.forEach( ( gallery ) => {
-			const gap     = getGapPx( gallery );
+			const gap = getGapPx( gallery );
 			const columns = parseInt( gallery.dataset.columns, 10 ) || 3;
-			const items   = gallery.querySelectorAll( '.ph-gallery-item' );
+			const items = gallery.querySelectorAll( '.ph-gallery-item' );
 
 			function cellWidth() {
 				const containerWidth = gallery.offsetWidth;
@@ -31,7 +33,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 			function sizeItems( width ) {
 				items.forEach( ( item ) => {
-					item.style.width        = width + 'px';
+					item.style.width = width + 'px';
 					item.style.marginBottom = gap + 'px';
 				} );
 			}
@@ -44,7 +46,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			// resize, and Isotope has no supported way to update it after init.
 			const iso = new Isotope( gallery, {
 				itemSelector: '.ph-gallery-item',
-				layoutMode:   'masonry',
+				layoutMode: 'masonry',
 				masonry: {
 					gutter: gap,
 				},
@@ -63,7 +65,9 @@ document.addEventListener( 'DOMContentLoaded', () => {
 				if ( img.complete ) {
 					return;
 				}
-				img.addEventListener( 'load', () => iso.layout(), { once: true } );
+				img.addEventListener( 'load', () => iso.layout(), {
+					once: true,
+				} );
 			} );
 		} );
 } );
