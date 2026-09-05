@@ -3,23 +3,12 @@
  *
  * Reads natural image dimensions from data-width / data-height attributes
  * set by render.php, calls justifiedLayout() to get box geometry, then applies
- * absolute positioning to every item. Re-calculates on container resize via
- * ResizeObserver so the layout stays correct when the browser is resized or
- * the content area width changes (e.g. editor sidebar open/close).
+ * absolute positioning to every item. Re-calculates on container resize so the
+ * layout stays correct when the browser is resized or the content area width
+ * changes (e.g. editor sidebar open/close).
  */
 
-function getGapPx( el ) {
-	const raw = getComputedStyle( el ).getPropertyValue( '--ph-gallery-gap' ).trim();
-	if ( ! raw ) {
-		return 16;
-	}
-	const tmp = document.createElement( 'div' );
-	tmp.style.cssText = 'position:absolute;visibility:hidden;width:' + raw;
-	document.documentElement.appendChild( tmp );
-	const px = tmp.offsetWidth;
-	document.documentElement.removeChild( tmp );
-	return px;
-}
+import { getGapPx, onWidthChange } from './gap';
 
 document.addEventListener( 'DOMContentLoaded', () => {
 	const justifiedLayout = window.JustifiedLayoutLib; // eslint-disable-line no-undef
@@ -77,17 +66,6 @@ document.addEventListener( 'DOMContentLoaded', () => {
 			}
 
 			applyLayout();
-
-			if ( typeof ResizeObserver !== 'undefined' ) {
-				let lastWidth = gallery.offsetWidth;
-				const ro = new ResizeObserver( () => {
-					const newWidth = gallery.offsetWidth;
-					if ( newWidth !== lastWidth ) {
-						lastWidth = newWidth;
-						applyLayout();
-					}
-				} );
-				ro.observe( gallery );
-			}
+			onWidthChange( gallery, applyLayout );
 		} );
 } );

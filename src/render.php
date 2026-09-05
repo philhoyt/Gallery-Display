@@ -108,14 +108,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	}
 
 	if ( 'lightbox' === $link_to ) {
-		// PhotoSwipe CSS is extracted from init-lightbox.js into init-lightbox.css.
-		wp_enqueue_style(
-			'ph-gallery-display-photoswipe',
-			$plugin_url . 'build/frontend/init-lightbox.css',
-			array(),
-			$version
-		);
-
+		// The PhotoSwipe stylesheet is registered with wp_enqueue_block_style()
+		// in the main plugin file so it lands in the head — enqueueing it here
+		// printed it after wp_head and caused a flash of unstyled links.
 		wp_enqueue_script(
 			'ph-gallery-display-init-lightbox',
 			$plugin_url . 'build/frontend/init-lightbox.js',
@@ -253,6 +248,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// CSS custom properties carry gap, columns, aspect-ratio, and border values
 	// so layout CSS never needs to repeat them as inline styles.
 
+	// Block attributes come from post content and are not validated by the
+	// block API. get_block_wrapper_attributes() runs esc_attr() over its
+	// values, so an attribute cannot break out of the style="" quoting — but
+	// a crafted value could still append its own CSS declaration inside it
+	// (e.g. an aspect ratio of "1/1;background:url(https://…)"). Validate the
+	// two free-form values before they reach the declaration list. $columns
+	// and $row_height are already cast to int above.
+
 	$gap_raw = $attributes['style']['spacing']['blockGap'] ?? null;
 	$gap     = is_string( $gap_raw ) && '' !== $gap_raw ? $gap_raw : '16px';
 
@@ -260,6 +263,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	// Convert to a valid CSS value: "var(--wp--preset--spacing--80)".
 	if ( str_starts_with( $gap, 'var:' ) ) {
 		$gap = 'var(--wp--' . str_replace( '|', '--', substr( $gap, 4 ) ) . ')';
+	}
+
+	if ( ! preg_match( '/^(?:\d+(?:\.\d+)?(?:px|em|rem|%|vw|vh)|var\(--wp--[a-zA-Z0-9-]+\))$/', $gap ) ) {
+		$gap = '16px';
+	}
+
+	if ( ! preg_match( '#^\d+(?:\.\d+)?\s*/\s*\d+(?:\.\d+)?$#', (string) $aspect_ratio ) ) {
+		$aspect_ratio = '';
 	}
 
 	$css_vars = array(
@@ -272,9 +283,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$css_vars[] = "--ph-gallery-ratio:{$aspect_ratio}";
 	}
 
+	// $layout is already whitelisted above; $caption_position is not.
 	$extra_class = "is-layout-{$layout}";
 	if ( $show_caption ) {
-		$extra_class .= " has-caption caption-{$caption_position}";
+		$extra_class .= ' has-caption caption-' . sanitize_html_class( $caption_position, 'below' );
 	}
 
 	$wrapper_attrs = get_block_wrapper_attributes(
@@ -332,6 +344,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 			case 'media':
 				$href = esc_url( $img['full_url'] );
 				break;
+		}
+
+		// The link's only content is the <img>. When the attachment has no alt
+		// text the image contributes no accessible name, leaving the link
+		// unnamed for screen-reader users (WCAG 2.4.4, 4.1.2). Fall back to the
+		// attachment title, then its caption. If none of the three exist the
+		// image really is unlabelled content, so there is nothing truthful to
+		// announce and alt="" correctly marks it decorative.
+		if ( $href && '' === trim( (string) $img['alt'] ) ) {
+			$link_label = $img['title'] ? $img['title'] : $img['caption'];
+			if ( $link_label ) {
+				$link_extras .= ' aria-label="' . esc_attr( wp_strip_all_tags( $link_label ) ) . '"';
+			}
 		}
 
 		if ( $href ) {

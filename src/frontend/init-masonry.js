@@ -4,21 +4,12 @@
  * Reads window.IsotopeLib (set by isotope.js, registered as a dependency)
  * and initialises Isotope masonry on every masonry gallery on the page.
  * Re-layouts after each image loads to correct heights when images are
- * not yet in the browser cache.
+ * not yet in the browser cache, and again whenever the gallery's width
+ * changes — item widths are written as fixed pixel values, so they would
+ * otherwise keep their load-time size when the viewport is resized.
  */
 
-function getGapPx( el ) {
-	const raw = getComputedStyle( el ).getPropertyValue( '--ph-gallery-gap' ).trim();
-	if ( ! raw ) {
-		return 16;
-	}
-	const tmp = document.createElement( 'div' );
-	tmp.style.cssText = 'position:absolute;visibility:hidden;width:' + raw;
-	document.documentElement.appendChild( tmp );
-	const px = tmp.offsetWidth;
-	document.documentElement.removeChild( tmp );
-	return px;
-}
+import { getGapPx, onWidthChange } from './gap';
 
 document.addEventListener( 'DOMContentLoaded', () => {
 	const Isotope = window.IsotopeLib; // eslint-disable-line no-undef
@@ -29,23 +20,43 @@ document.addEventListener( 'DOMContentLoaded', () => {
 	document
 		.querySelectorAll( '.wp-block-ph-gallery-display[data-layout="masonry"]' )
 		.forEach( ( gallery ) => {
-			const gap          = getGapPx( gallery );
-			const columns      = parseInt( gallery.dataset.columns, 10 ) || 3;
-			const containerWidth = gallery.offsetWidth;
-			const cellWidth    = ( containerWidth - ( columns - 1 ) * gap ) / columns;
+			const gap     = getGapPx( gallery );
+			const columns = parseInt( gallery.dataset.columns, 10 ) || 3;
+			const items   = gallery.querySelectorAll( '.ph-gallery-item' );
 
-			gallery.querySelectorAll( '.ph-gallery-item' ).forEach( ( item ) => {
-				item.style.width        = cellWidth + 'px';
-				item.style.marginBottom = gap + 'px';
-			} );
+			function cellWidth() {
+				const containerWidth = gallery.offsetWidth;
+				return ( containerWidth - ( columns - 1 ) * gap ) / columns;
+			}
 
+			function sizeItems( width ) {
+				items.forEach( ( item ) => {
+					item.style.width        = width + 'px';
+					item.style.marginBottom = gap + 'px';
+				} );
+			}
+
+			sizeItems( cellWidth() );
+
+			// columnWidth is deliberately left unset: Isotope then derives it
+			// from the first item's outer width, which sizeItems() keeps
+			// current. Pinning it to a number here would make it stale on
+			// resize, and Isotope has no supported way to update it after init.
 			const iso = new Isotope( gallery, {
 				itemSelector: '.ph-gallery-item',
 				layoutMode:   'masonry',
 				masonry: {
-					columnWidth: cellWidth,
-					gutter:      gap,
+					gutter: gap,
 				},
+			} );
+
+			onWidthChange( gallery, () => {
+				const width = cellWidth();
+				if ( width <= 0 ) {
+					return;
+				}
+				sizeItems( width );
+				iso.layout();
 			} );
 
 			gallery.querySelectorAll( 'img' ).forEach( ( img ) => {
