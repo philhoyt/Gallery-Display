@@ -6,7 +6,7 @@
  * Requires at least: 6.6
  * Tested up to:      7.1
  * Requires PHP:      7.4
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            Phil Hoyt
  * Author URI:        https://philhoyt.com
  * License:           GPL-2.0-or-later
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GALLERY_DISPLAY_VERSION', '1.1.0' );
+define( 'GALLERY_DISPLAY_VERSION', '1.2.0' );
 define( 'GALLERY_DISPLAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GALLERY_DISPLAY_URL', plugin_dir_url( __FILE__ ) );
 

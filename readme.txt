@@ -4,7 +4,7 @@ Tags: gallery, images, masonry, lightbox, block
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,23 @@ deleted. The plugin stores no options, user meta, or custom tables.
 3. The block's layout and image settings in the inspector.
 
 == Changelog ==
+
+= 1.2.0 =
+* Add: Convert a WordPress Gallery block into a Gallery Display block from the
+  block toolbar, and convert it back again. Images, captions, alt text,
+  columns, link settings, alignment, spacing and colours all carry across.
+* Add: A caption for the gallery itself, shown below the images. Supports bold,
+  italic and links.
+* Add: Left, centre and right alignment, alongside the existing wide and full.
+* Add: An HTML anchor, so a gallery can be linked to directly.
+* Add: Per-image alt text and captions can now be set on the block. Where they
+  are, they take precedence; images without them keep following the media
+  library as before, so editing an image still updates every gallery using it.
+* Add: Images can open in a new tab, and images marked decorative in a
+  converted gallery stay decorative.
+* Change: The gallery wrapper is now a <figure> element rather than a <div>, so
+  the gallery caption is valid HTML. Custom CSS targeting the old element name
+  may need updating.
 
 = 1.1.0 =
 * Add: Image ordering controls. Order a gallery by date, title, random, or the
