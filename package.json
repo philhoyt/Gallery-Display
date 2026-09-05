@@ -13,9 +13,12 @@
 		"lint": "npm run lint:js && npm run lint:css && npm run lint:php",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "WP_COPY_PHP_FILES_TO_DIST=true wp-scripts plugin-zip",
-		"start": "WP_COPY_PHP_FILES_TO_DIST=true wp-scripts start"
+		"start": "WP_COPY_PHP_FILES_TO_DIST=true wp-scripts start",
+		"test:unit": "wp-scripts test-unit-js",
+		"test": "npm run test:unit"
 	},
 	"devDependencies": {
+		"@wordpress/hooks": "^4.54.0",
 		"@wordpress/scripts": "^30.0.0"
 	},
 	"dependencies": {

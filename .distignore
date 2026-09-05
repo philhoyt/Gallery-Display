@@ -1,0 +1,22 @@
+# Files excluded from the distributed plugin zip.
+.git
+.github
+.gitignore
+.distignore
+.eslintrc.js
+.DS_Store
+.claude
+node_modules
+vendor
+plans
+docs
+src
+tests
+composer.json
+composer.lock
+package.json
+package-lock.json
+phpcs.xml
+webpack.config.js
+*.zip
+*.log
