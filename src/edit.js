@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps, RichText } from '@wordpress/block-editor';
 import { Placeholder, Button, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
 
 import Inspector from './inspector';
 import MediaSelector from './MediaSelector';
@@ -19,9 +20,47 @@ export default function Edit( { attributes, setAttributes } ) {
 	// Set by wp_add_inline_script in gallery-display.php.
 	const pluginUrl = window.GalleryDisplayPluginUrl ?? '';
 
+	// Images that arrived through a transform from core/gallery carry no
+	// dimensions, because core/image does not store any. The justified and
+	// mosaic previews need aspect ratios, so resolve them from the media
+	// library here.
+	//
+	// Read-only on purpose. Writing these back with setAttributes would mark
+	// the post dirty simply by opening it, and would churn undo history as the
+	// async results land. The front end never needs them either — render.php
+	// re-resolves every image from its attachment id.
+	const dimensions = useSelect(
+		( select ) => {
+			const core = select( 'core' );
+			if ( ! core || typeof core.getMedia !== 'function' ) {
+				return {};
+			}
+
+			const resolved = {};
+			( images ?? [] ).forEach( ( img ) => {
+				if ( img.width && img.height ) {
+					return;
+				}
+				const id = Number( img.id );
+				if ( ! id ) {
+					return;
+				}
+				const details = core.getMedia( id )?.media_details;
+				if ( details?.width && details?.height ) {
+					resolved[ id ] = {
+						width: details.width,
+						height: details.height,
+					};
+				}
+			} );
+			return resolved;
+		},
+		[ images ]
+	);
+
 	const previewDoc =
 		images?.length && pluginUrl
-			? buildPreviewDoc( attributes, pluginUrl )
+			? buildPreviewDoc( attributes, pluginUrl, dimensions )
 			: null;
 
 	// --- Empty state ---

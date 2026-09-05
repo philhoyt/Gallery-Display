@@ -61,9 +61,13 @@ function resolveGapValue( raw ) {
  *
  * @param {Object} attributes Block attributes.
  * @param {string} pluginUrl  Absolute URL to the plugin root (trailing slash).
+ * @param {Object} dimensions Map of attachment id to { width, height }, used
+ *                            when an image carries no stored dimensions — as
+ *                            happens after a transform from core/gallery.
+ *                            Resolved read-only by the editor; never stored.
  * @return {string} Full HTML document.
  */
-export function buildPreviewDoc( attributes, pluginUrl ) {
+export function buildPreviewDoc( attributes, pluginUrl, dimensions = {} ) {
 	const {
 		images,
 		layout,
@@ -103,6 +107,12 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 	// Build figure items.
 	const itemsHtml = images
 		.map( ( img, i ) => {
+			// A transformed gallery has no stored dimensions — core/image does
+			// not carry them. The editor resolves them read-only and passes
+			// them in here; they are never written back to attributes.
+			const resolved = dimensions[ img.id ] ?? {};
+			const imgWidth = img.width || resolved.width || '';
+			const imgHeight = img.height || resolved.height || '';
 			const isLarge =
 				safeLayout === 'mosaic' && MOSAIC_LARGE.has( i % 5 );
 			const itemClass = isLarge
@@ -122,8 +132,8 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 				linkOpen = `<a href="${ esc(
 					img.url
 				) }" class="ph-gallery-item__link"${ labelAttr } data-pswp-width="${ esc(
-					img.width
-				) }" data-pswp-height="${ esc( img.height ) }">`;
+					imgWidth
+				) }" data-pswp-height="${ esc( imgHeight ) }">`;
 				linkClose = '</a>';
 			} else if ( linkTo === 'media' ) {
 				linkOpen = `<a href="${ esc(
@@ -150,11 +160,11 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 			return `<figure class="${ itemClass }">${ linkOpen }<img src="${ esc(
 				img.url
 			) }" alt="${ esc( img.alt ) }" width="${ esc(
-				img.width
-			) }" height="${ esc( img.height ) }" data-width="${ esc(
-				img.width
+				imgWidth
+			) }" height="${ esc( imgHeight ) }" data-width="${ esc(
+				imgWidth
 			) }" data-height="${ esc(
-				img.height
+				imgHeight
 			) }" loading="lazy" decoding="async">${ linkClose }${ captionHtml }</figure>`;
 		} )
 		.join( '' );
