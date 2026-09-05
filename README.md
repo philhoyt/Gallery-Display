@@ -1,5 +1,7 @@
 # Gallery Display
 
+[![CI](https://github.com/philhoyt/gallery-display/actions/workflows/ci.yml/badge.svg)](https://github.com/philhoyt/gallery-display/actions/workflows/ci.yml)
+
 An image gallery block for WordPress with grid, masonry, mosaic, justified, and
 list layouts.
 
@@ -48,7 +50,14 @@ npm run build        # production build
 npm run test:unit    # Jest
 npm run lint         # ESLint, Stylelint and PHPCS
 npm run format       # Prettier
+composer run lint    # PHPCS on its own
 ```
+
+CI runs on every pull request and every push to `main`
+(`.github/workflows/ci.yml`): PHPCS and a `php -l` syntax check across PHP
+7.4 through 8.4, then ESLint, Stylelint, the Jest suite, and a production
+build. Both dependency trees are audited — `composer audit` and
+`npm audit --omit=dev`.
 
 Blocks build from `src/` into `build/`. `src/render.php` is copied into `build/`
 by the `WP_COPY_PHP_FILES_TO_DIST` flag in the build scripts, so at runtime it

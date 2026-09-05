@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Starts at the plugin header's "Requires PHP: 7.4". Keep these in
+        # sync — the matrix is what backs that claim.
+        php: [ '7.4', '8.0', '8.1', '8.2', '8.3', '8.4' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer
+          coverage: none
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Audit PHP dependencies
+        run: composer audit
+
+      # phpcs tokenizes with its own parser, so it passing on one version says
+      # nothing about whether the file parses on another. This is the step that
+      # actually earns the matrix.
+      - name: Syntax check
+        run: find . -name '*.php' -not -path './vendor/*' -not -path './node_modules/*' -not -path './build/*' -print0 | xargs -0 -n1 -P4 php -l
+
+      - name: Lint (phpcs)
+        run: composer run lint
+
+  js:
+    name: JavaScript
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # wp-scripts 34 requires >=18.12.0.
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Audit JS dependencies (production only)
+        run: npm audit --omit=dev
+
+      - name: Lint JS
+        run: npm run lint:js
+
+      - name: Lint CSS
+        run: npm run lint:css
+
+      # Covers the sanitizers and the editor preview document, including the
+      # regression tests for the stored-XSS fix. Do not let this job go
+      # unwatched — it is the gate on that fix.
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
