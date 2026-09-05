@@ -63,11 +63,16 @@
 		"orderBy": {
 			"type": "string",
 			"default": "default"
+		},
+		"caption": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"supports": {
 		"html": false,
-		"align": [ "wide", "full" ],
+		"anchor": true,
+		"align": true,
 		"color": {
 			"background": true,
 			"text": false
