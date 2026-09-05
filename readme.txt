@@ -4,7 +4,7 @@ Tags: gallery, images, masonry, lightbox, block
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -67,20 +67,27 @@ deleted. The plugin stores no options, user meta, or custom tables.
 
 == Changelog ==
 
-= 1.0.1 =
-* Security: escape and validate block attributes before they reach the editor
-  preview document. A crafted attribute could previously inject markup that ran
-  in the admin.
-* Security: validate the aspect-ratio and block-gap values used in the block's
+= 1.1.0 =
+* Add: Image ordering controls. Order a gallery by date, title, random, or the
+  order you arranged it in, with a best-fit option that places wide images in
+  the mosaic layout's larger cells.
+* Add: Filters that let a companion plugin register its own layout —
+  `gallery_display_valid_layouts` in PHP, `galleryDisplay.layouts` and
+  `galleryDisplay.previewStylesheets` in JavaScript.
+* Security: Escape and validate block attributes before they reach the editor
+  preview. A crafted attribute could previously inject markup that ran in the
+  admin. The preview is now sandboxed as well.
+* Security: Validate the aspect-ratio and block-gap values used in the block's
   inline styles.
-* Fixed: masonry and mosaic layouts no longer keep their load-time widths when
+* Fix: Masonry and mosaic layouts no longer keep their load-time widths when
   the browser is resized.
-* Fixed: the lightbox stylesheet now loads in the document head instead of after
+* Fix: The lightbox stylesheet now loads in the document head instead of after
   the page content, removing a flash of unstyled links.
-* Accessibility: gallery links now fall back to the attachment title or caption
-  for their accessible name when the image has no alt text.
-* Added: image ordering controls, and filters that let a companion plugin
-  register a layout.
+* Fix: Gallery links fall back to the attachment title or caption for their
+  accessible name when the image has no alt text.
+* Fix: Asset cache-busting used a stale version number, so browsers could keep
+  serving outdated CSS and JavaScript after an update.
+* Change: Image-size labels in the block sidebar are now translatable.
 
 = 1.0.0 =
 * Initial release.

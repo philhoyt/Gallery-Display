@@ -1,0 +1,77 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      # Uses .distignore. Ships build/ and lib/ (Plugin Update Checker);
+      # excludes src/, node_modules/, vendor/ and the tooling configs.
+      - name: Create plugin zip
+        run: npm run plugin-zip
+
+      # The update checker downloads this asset rather than GitHub's source
+      # archive, which has no build/ directory and extracts to a differently
+      # named folder. Fail loudly if the zip is malformed.
+      - name: Verify zip
+        run: |
+          set -euo pipefail
+          unzip -l gallery-display.zip > listing.txt
+          for required in \
+            gallery-display/gallery-display.php \
+            gallery-display/build/render.php \
+            gallery-display/build/block.json \
+            gallery-display/lib/plugin-update-checker/plugin-update-checker.php \
+            gallery-display/readme.txt
+          do
+            grep -q "$required" listing.txt || { echo "MISSING from zip: $required"; exit 1; }
+          done
+          if grep -Eq "node_modules|/src/|\.github|\.claude" listing.txt; then
+            echo "Zip contains files that should not ship:"
+            grep -E "node_modules|/src/|\.github|\.claude" listing.txt
+            exit 1
+          fi
+          echo "Zip OK"
+
+      # Fail rather than publish a release with an empty body — that usually
+      # means the readme heading does not match the tag.
+      - name: Extract changelog
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk "/^= ${VERSION} =/{found=1} found && /^= [0-9]/ && !/^= ${VERSION} =/{exit} found{print}" readme.txt > changelog_body.txt
+          if [ ! -s changelog_body.txt ]; then
+            echo "No changelog section found for ${VERSION} in readme.txt"
+            exit 1
+          fi
+          cat changelog_body.txt
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            gallery-display.zip
+            readme.txt
+          body_path: changelog_body.txt

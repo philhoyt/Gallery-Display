@@ -3,7 +3,7 @@
 .github
 .gitignore
 .distignore
-.eslintrc.js
+eslint.config.js
 .DS_Store
 .claude
 node_modules

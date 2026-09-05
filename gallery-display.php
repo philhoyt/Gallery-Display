@@ -1,12 +1,12 @@
 <?php
 /**
  * Plugin Name:       Gallery Display
- * Plugin URI:        https://github.com/philhoyt/gallery-display
+ * Plugin URI:        https://github.com/philhoyt/Gallery-Display
  * Description:       A flexible image gallery block with grid, masonry, mosaic, justified, and list layouts.
  * Requires at least: 6.6
  * Tested up to:      7.1
  * Requires PHP:      7.4
- * Version:           1.0.1
+ * Version:           1.1.0
  * Author:            Phil Hoyt
  * Author URI:        https://philhoyt.com
  * License:           GPL-2.0-or-later
@@ -18,13 +18,35 @@
 
 namespace PH\GalleryDisplay;
 
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GALLERY_DISPLAY_VERSION', '1.0.1' );
+define( 'GALLERY_DISPLAY_VERSION', '1.1.0' );
 define( 'GALLERY_DISPLAY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GALLERY_DISPLAY_URL', plugin_dir_url( __FILE__ ) );
+
+/**
+ * Check GitHub releases for updates.
+ *
+ * The plugin is distributed through GitHub releases rather than WordPress.org,
+ * so Plugin Update Checker compares the Version header against the latest
+ * release tag. enableReleaseAssets() makes it download the built zip attached
+ * to the release instead of GitHub's source archive — the source archive has
+ * no build/ directory and extracts to a differently named folder.
+ *
+ * lib/plugin-update-checker/ is committed and shipped; vendor/ is neither.
+ */
+require_once GALLERY_DISPLAY_DIR . 'lib/plugin-update-checker/plugin-update-checker.php';
+
+$gallery_display_update_checker = PucFactory::buildUpdateChecker(
+	'https://github.com/philhoyt/Gallery-Display/',
+	__FILE__,
+	'gallery-display'
+);
+$gallery_display_update_checker->getVcsApi()->enableReleaseAssets();
 
 /**
  * Register the block and its per-layout stylesheets.

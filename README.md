@@ -1,6 +1,6 @@
 # Gallery Display
 
-[![CI](https://github.com/philhoyt/gallery-display/actions/workflows/ci.yml/badge.svg)](https://github.com/philhoyt/gallery-display/actions/workflows/ci.yml)
+[![CI](https://github.com/philhoyt/Gallery-Display/actions/workflows/ci.yml/badge.svg)](https://github.com/philhoyt/Gallery-Display/actions/workflows/ci.yml)
 
 An image gallery block for WordPress with grid, masonry, mosaic, justified, and
 list layouts.
