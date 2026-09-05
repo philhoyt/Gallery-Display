@@ -43,11 +43,13 @@ const ORDER_OPTIONS_MOSAIC = [
 	{ value: 'auto', label: __( 'Auto (best fit)', 'gallery-display' ) },
 ];
 
+// Shown when the image-sizes request fails — which is exactly when a
+// translated fallback matters, so these are localized like every other label.
 const FALLBACK_SIZES = [
-	{ value: 'thumbnail', label: 'Thumbnail' },
-	{ value: 'medium',    label: 'Medium' },
-	{ value: 'large',     label: 'Large' },
-	{ value: 'full',      label: 'Full Size' },
+	{ value: 'thumbnail', label: __( 'Thumbnail', 'gallery-display' ) },
+	{ value: 'medium',    label: __( 'Medium', 'gallery-display' ) },
+	{ value: 'large',     label: __( 'Large', 'gallery-display' ) },
+	{ value: 'full',      label: __( 'Full Size', 'gallery-display' ) },
 ];
 
 export default function Inspector( { attributes, setAttributes } ) {
