@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { useBlockProps } from '@wordpress/block-editor';
+import { useBlockProps, RichText } from '@wordpress/block-editor';
 import { Placeholder, Button, Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 
@@ -8,7 +8,7 @@ import MediaSelector from './MediaSelector';
 import { buildPreviewDoc } from './preview-doc';
 
 export default function Edit( { attributes, setAttributes } ) {
-	const { images, layout } = attributes;
+	const { images, layout, caption } = attributes;
 
 	const blockProps = useBlockProps( {
 		className: 'ph-gallery-display-editor',
@@ -101,6 +101,26 @@ export default function Edit( { attributes, setAttributes } ) {
 						</Button>
 					</div>
 				</div>
+
+				{ /*
+				   Gallery-level caption, matching core/gallery. Rich text, so
+				   render.php filters it with wp_kses_post() and the preview
+				   applies the matching allowlist from sanitize.js.
+				*/ }
+				<RichText
+					identifier="caption"
+					tagName="figcaption"
+					className="wp-block-ph-gallery-display__caption"
+					aria-label={ __( 'Gallery caption', 'gallery-display' ) }
+					placeholder={ __(
+						'Add a gallery caption…',
+						'gallery-display'
+					) }
+					value={ caption }
+					onChange={ ( value ) =>
+						setAttributes( { caption: value } )
+					}
+				/>
 			</div>
 
 			{ isPreviewOpen && previewDoc && (

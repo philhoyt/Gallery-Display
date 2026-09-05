@@ -8,7 +8,14 @@
 
 import { applyFilters } from '@wordpress/hooks';
 
-import { esc, cssIdent, cssRatio, cssLength, intInRange } from './sanitize';
+import {
+	esc,
+	cssIdent,
+	cssRatio,
+	cssLength,
+	intInRange,
+	sanitizeCaption,
+} from './sanitize';
 
 const MOSAIC_LARGE = new Set( [ 0, 3 ] );
 
@@ -66,6 +73,7 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 		rowHeight,
 		showCaption,
 		captionPosition,
+		caption,
 		style: blockStyle,
 	} = attributes;
 
@@ -186,6 +194,14 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 		.filter( Boolean )
 		.join( '\n' );
 
+	// Rich text, so it goes through the caption allowlist rather than esc().
+	// Escaping it would render tags as visible text and make the preview
+	// disagree with what render.php produces.
+	const safeGalleryCaption = sanitizeCaption( caption );
+	const galleryCaptionHtml = safeGalleryCaption
+		? `<figcaption class="wp-block-ph-gallery-display__caption">${ safeGalleryCaption }</figcaption>`
+		: '';
+
 	return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -194,17 +210,17 @@ export function buildPreviewDoc( attributes, pluginUrl ) {
 ${ css }
 <style>
   body { margin: 0; padding: 24px; box-sizing: border-box; background: #fff; }
-  .wp-block-ph-gallery-display { max-width: 100%; }
+  .wp-block-ph-gallery-display { max-width: 100%; margin: 0; }
   .ph-gallery-item { pointer-events: none; }
 </style>
 </head>
 <body>
-<div class="${ wrapperClass }"
+<figure class="${ wrapperClass }"
   data-layout="${ safeLayout }"
   data-columns="${ safeColumns }"
   data-row-height="${ safeRowHeight }"
   style="${ cssVars }"
->${ itemsHtml }</div>
+>${ itemsHtml }${ galleryCaptionHtml }</figure>
 ${ js }
 </body>
 </html>`;
