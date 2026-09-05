@@ -9,6 +9,13 @@ const globals = require( 'globals' );
 const defaultConfig = require( '@wordpress/scripts/config/eslint.config.cjs' );
 
 module.exports = [
+	// Vendored copy of Plugin Update Checker. Committed and shipped, but
+	// third-party code held to its own standards — the same reason phpcs.xml
+	// excludes lib/. wp-scripts already ignores build, node_modules and vendor.
+	{
+		ignores: [ '**/lib/**' ],
+	},
+
 	...defaultConfig,
 
 	{
