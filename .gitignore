@@ -5,3 +5,4 @@ node_modules
 /docs
 *.zip
 /plans
+.claude/settings.local.json
