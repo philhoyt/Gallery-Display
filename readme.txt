@@ -4,7 +4,7 @@ Tags: gallery, images, masonry, lightbox, block
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -66,6 +66,9 @@ deleted. The plugin stores no options, user meta, or custom tables.
 3. The block's layout and image settings in the inspector.
 
 == Changelog ==
+
+= 1.2.1 =
+* Change: Tested against WordPress 7.1 and rebuilt with the current block editor toolchain.
 
 = 1.2.0 =
 * Add: Convert a WordPress Gallery block into a Gallery Display block from the
