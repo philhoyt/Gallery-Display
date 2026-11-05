@@ -7,6 +7,7 @@
  */
 const globals = require( 'globals' );
 const defaultConfig = require( '@wordpress/scripts/config/eslint.config.cjs' );
+const jestPlugin = require( 'eslint-plugin-jest' );
 
 module.exports = [
 	// Vendored copy of Plugin Update Checker. Committed and shipped, but
@@ -40,12 +41,10 @@ module.exports = [
 		},
 	},
 
+	// The unit suite stays on Jest (wp-scripts test-unit-jest); the default
+	// test override in @wordpress/eslint-plugin 27+ targets Vitest instead.
 	{
-		files: [ '**/*.test.js' ],
-		languageOptions: {
-			globals: {
-				...globals.jest,
-			},
-		},
+		...jestPlugin.configs[ 'flat/recommended' ],
+		files: [ 'src/**/*.test.js' ],
 	},
 ];

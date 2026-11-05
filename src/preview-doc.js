@@ -127,7 +127,7 @@ export function buildPreviewDoc( attributes, pluginUrl, dimensions = {} ) {
 				? ''
 				: ` aria-label="${ esc(
 						img.filename || __( 'Image', 'gallery-display' )
-				  ) }"`;
+					) }"`;
 
 			let linkOpen = '';
 			let linkClose = '';
@@ -157,7 +157,7 @@ export function buildPreviewDoc( attributes, pluginUrl, dimensions = {} ) {
 				showCaption && img.caption && safeLayout !== 'list'
 					? `<figcaption class="ph-gallery-item__caption">${ esc(
 							img.caption
-					  ) }</figcaption>`
+						) }</figcaption>`
 					: '';
 
 			return `<figure class="${ itemClass }">${ linkOpen }<img src="${ esc(
