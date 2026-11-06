@@ -4,7 +4,7 @@ Tags: gallery, images, masonry, lightbox, block
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -69,6 +69,10 @@ The block stops rendering and its markup is left in the post content. Nothing is
 3. The block's layout and image settings in the inspector.
 
 == Changelog ==
+
+= 1.2.2 =
+* Fixed the update checker so it always installs the release zip, not whichever file GitHub lists first.
+* Rewrote the readme files in plain English.
 
 = 1.2.1 =
 * Tested up to WordPress 7.1 and rebuilt with the current block editor toolchain.
